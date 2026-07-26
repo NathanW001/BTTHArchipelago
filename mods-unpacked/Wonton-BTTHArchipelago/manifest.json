@@ -1,0 +1,17 @@
+{
+	"name": "BTTHArchipelago",
+	"namespace": "Wonton",
+	"version_number": "1.0.0",
+	"description": "Implementation of the Archipelago Client specification",
+	"website_url": "https://github.com/example/repo",
+	"dependencies": [],
+	"extra": {
+		"godot": {
+			"authors": ["Wonton"],
+			"incompatibilities": [],
+			"compatible_mod_loader_version": ["6.2.0"],
+			"compatible_game_version": ["1.2.3"],
+			"config_schema": {}
+		}
+	}
+}
