@@ -184,8 +184,8 @@ visit_ediface_roots = "Visit Location - Ediface Roots"
 visit_third_cistern = "Visit Location - Third Cistern"
 
 ## Checkpoint Locations, Location Code 6xxxx ##
-checkpooint_0_mola_town = "Reached Checkpoint 0 - Mola Town"
-checkpooint_1_mola_town = "Reached Checkpoint 1 - Mola Town (Lake Jalta)"
+checkpoint_0_mola_town = "Reached Checkpoint 0 - Mola Town"
+checkpoint_1_mola_town = "Reached Checkpoint 1 - Mola Town (Lake Jalta)"
 checkpoint_1_belwheat_valley = "Reached Checkpoint 1 - Belwheat Valley"
 checkpoint_2_belwheat_valley = "Reached Checkpoint 2 - Belwheat Valley"
 checkpoint_3_belwheat_valley = "Reached Checkpoint 3 - Belwheat Valley"

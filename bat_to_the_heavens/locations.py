@@ -112,8 +112,8 @@ location_visit_locations = {
 
 # Checkpoint Locations
 checkpoint_loctations = {
-    names.checkpooint_0_mola_town: 60000,
-	names.checkpooint_1_mola_town: 60001,
+    names.checkpoint_0_mola_town: 60000,
+	names.checkpoint_1_mola_town: 60001,
 	names.checkpoint_1_belwheat_valley: 60002,
 	names.checkpoint_2_belwheat_valley: 60003,
 	names.checkpoint_3_belwheat_valley: 60004,
@@ -212,16 +212,16 @@ mola_town_locations = {
 	names.fizzy_mola_town_2: 1,
     names.collect_postcard_mola_town: 10000,
     names.collect_logbook: 30000,
-    names.collect_default_bat: 40000,
     names.visit_mola_town: 50000,
 }
 mola_town_checkpoint_locations = {
-    names.checkpooint_0_mola_town: 60000,
-	names.checkpooint_1_mola_town: 60001,
+    names.checkpoint_0_mola_town: 60000,
+	names.checkpoint_1_mola_town: 60001,
 }
 belwheat_valley_locations = {
     names.fizzy_belwheat_valley_1: 2,
     names.collect_postcard_belwheat_valley: 10001,
+	names.collect_default_bat: 40000,
     names.visit_belwheat_valley: 50001,
 }
 belwheat_valley_checkpoint_locations = {

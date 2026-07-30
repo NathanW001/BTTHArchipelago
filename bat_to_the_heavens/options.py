@@ -1,4 +1,5 @@
 from Options import Choice, Toggle, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, Toggle, DeathLink
+from dataclasses import dataclass
 
 class Goal(Choice):
   """
@@ -19,7 +20,7 @@ class CheckpointSanity(DefaultOnToggle):
   """
   display_name = "CheckpointSanity"
 
-class RandomizeStartingBat(Toggle):
+class RandomizeStartingBat(Toggle): # TODO: maybe retool to force early rather than randomize
   """
   Randomizes the Starting Bat and disables the ability to recieve the Pink Bat from getting softlocked.
   """

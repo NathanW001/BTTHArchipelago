@@ -4,6 +4,7 @@ from typing import Dict, Optional, Callable
 
 from . import names
 from . import locations
+from .rules import get_location_logic_mapping
 
 class BTTHRegion(Region):
     game = "Bat to the Heavens"
@@ -147,11 +148,11 @@ def connect_regions(world: World) -> None:
 
     # Helper Lambdas
     has_a_normal_bat = lambda state: ( # TODO: check if every area is beatable with the phant bat
-        (state.has(names.default_bat) or
-         state.has(names.angel_bat) or
-         state.has(names.fizzy_bat) or
-         state.has(names.power_bat) or
-         state.has(names.pink_bat))
+        (state.has(names.default_bat, world.player) or
+         state.has(names.angel_bat, world.player) or
+         state.has(names.fizzy_bat, world.player) or
+         state.has(names.power_bat, world.player) or
+         state.has(names.pink_bat, world.player))
     )
 
     connect(world, world.player, region_names, "Menu", names.mola_town)
@@ -175,7 +176,9 @@ def connect_regions(world: World) -> None:
          state.has(names.ball_power, world.player))
     )
     connect(world, world.player, region_names, names.mola_town, names.warp_room, mola_town_to_warp_room)
-    connect(world, world.player, region_names, names.mola_town, names.belwheat_valley, None)
+    # Since the default bat is technically located in Belwheat Valley, we need the condition to be None to
+    # prevent softlocks when fixing the bat's location
+    connect(world, world.player, region_names, names.mola_town, names.belwheat_valley, None) 
 
     # Connections from Belwheat Valley
     belwheat_valley_to_gc_warehouse = lambda state: (
@@ -459,10 +462,13 @@ def connect_regions(world: World) -> None:
 
 def create_region(world: World, name: str, location_checks=None):
     ret = BTTHRegion(name, world.player, world.multiworld)
+    location_rules = get_location_logic_mapping(world)
     if location_checks:
         for loc_name, loc_id in location_checks.items():
-            location = locations.BTTHLocaiton(world.player, loc_name, loc_id, ret)
+            location = locations.BTTHLocation(world.player, loc_name, loc_id, ret)
             ret.locations.append(location)
+            if loc_name in location_rules:
+                world.set_rule(location, location_rules[loc_name])
 
     return ret
 
