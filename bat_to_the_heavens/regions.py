@@ -163,8 +163,7 @@ def connect_regions(world: World) -> None:
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player)) or
-        (state.has(names.phant_bat, world.player))
+         state.has(names.ball_power, world.player))
     )
     connect(world, world.player, region_names, names.mola_town, names.jalta_dregs, mola_town_to_jalta_dregs)
     mola_town_to_sand_hell = lambda state: (
@@ -190,7 +189,8 @@ def connect_regions(world: World) -> None:
     # Connections from GC Warehouse
     gc_warehouse_to_entrance_ruins = lambda state: (
         (has_a_normal_bat(state) and
-         state.has(names.yellow_fence, world.player))
+         state.has(names.yellow_fence, world.player) and
+         state.has(names.jump_block, world.player))
     )
     connect(world, world.player, region_names, names.gc_warehouse, names.entrance_ruins, gc_warehouse_to_entrance_ruins)
 
@@ -198,12 +198,14 @@ def connect_regions(world: World) -> None:
     entrance_ruins_to_gc_factory = lambda state: (
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
-         state.has(names.jump_block, world.player))
+         state.has(names.jump_block, world.player) and
+         state.has(names.momentum_launcher, world.player))
     )
     connect(world, world.player, region_names, names.entrance_ruins, names.goldcherry_factory, entrance_ruins_to_gc_factory)
     entrance_ruins_to_port_naga = lambda state: ( # Can ride the train from here to Port Naga
         (has_a_normal_bat(state) and
-         state.has(names.train_ticket, world.player))
+         state.has(names.train_ticket, world.player),
+         state.has(names.master_key, world.player))
     )
     connect(world, world.player, region_names, names.entrance_ruins, names.port_naga, entrance_ruins_to_port_naga)
 

@@ -17,7 +17,7 @@ bat_table = {
     names.default_bat: ItemData(0, True, useful=True),
     names.angel_bat: ItemData(1, True, useful=True),
     names.fizzy_bat: ItemData(2, True, useful=True),
-    names.phant: ItemData(3, True, useful=True),
+    names.phant_bat: ItemData(3, True, useful=True),
     names.power_bat: ItemData(4, True, useful=True),
     names.pink_bat: ItemData(5, True, useful=True),
 }
@@ -35,9 +35,9 @@ collectable_table = {
     names.postcard_port_naga: ItemData(10009, False),
     names.postcard_basin_21: ItemData(10010, False),
     names.postcard_pastel_strata: ItemData(10011, False),
-    names.postcard_precipice_bridge: ItemData(10011, False),
-    names.postcard_villiths_drain: ItemData(10012, False),
-    names.butter_card: ItemData(10013, False),
+    names.postcard_precipice_bridge: ItemData(10012, False),
+    names.postcard_villiths_drain: ItemData(10013, False),
+    names.butter_card: ItemData(10014, False),
 }
 
 equipment_table = {

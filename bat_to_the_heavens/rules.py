@@ -20,9 +20,7 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
          state.has(names.pink_bat, world.player))
     )
 
-    #######################
-    # Mola Town Locations #
-    #######################
+    # Mola Town Locations
     location_logic_mapping[names.fizzy_mola_town_1] = lambda state: (
         (has_a_normal_bat(state) and
          state.has(names.jump_block, world.player)) # Jump block needed to get back into Mola Town from the underside
@@ -52,9 +50,7 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
         (state.has(names.phant_bat, world.player))
     )
 
-    #############################
-    # Belwheat Valley Locations #
-    #############################
+    # Belwheat Valley Locations 
     # Note: since you can make it into Belwheat Valley area trigger the requirement to get here is None, everything else
     # here that isn't the bat will have to require the bat. Nothing here requires yellow fences, there's a steam 
     # achievement for completing the area without using them. I also personally verified that the fizzy doesn't need
@@ -65,6 +61,12 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
     location_logic_mapping[names.checkpoint_2_belwheat_valley] = has_a_normal_bat
     location_logic_mapping[names.checkpoint_3_belwheat_valley] = has_a_normal_bat
     location_logic_mapping[names.checkpoint_4_belwheat_valley] = has_a_normal_bat
+
+    # Cliff Face Location
+    location_logic_mapping[names.phant_1] = lambda state: ( # Key needed to get in the house
+        (state.has(names.master_key, world.player))
+    )
+
 
     # Additional Notes: 
     # - it's possible to progress to Entrance Ruins from GC Warehouse without actually touching a fence.
