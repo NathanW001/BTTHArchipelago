@@ -1,3 +1,3 @@
 Archipelago mod for the game Bat to the Heavens written in Godot Script using the Godot Mod Loader.
 
-THIS IS FAR FROM DONE, just wanted to start working on it
+right now it kinda works but it's pretty unstable. you have to have to run from a decomp to run the mod, I'll try to add in-game network configuration so that you can connect without editing code directly.

@@ -25,6 +25,7 @@ func install_script_extensions() -> void:
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/respawn.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/respawn2.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("player/player.gd"))
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("level/main_menu.gd"))
 	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join(...))
 
 
