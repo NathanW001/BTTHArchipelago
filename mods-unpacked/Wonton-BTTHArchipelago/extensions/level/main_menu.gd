@@ -1,7 +1,7 @@
 extends "res://level/main_menu.gd"
 
 const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:main_menu.gd"
-var archipelago_menu = load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_login.tscn")
+var archipelago_menu = load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_login/archipelago_login.tscn")
 var menu_item_font = load("res://font/Fredoka-SemiBold.ttf")
 
 var archipelago_options: CanvasLayer

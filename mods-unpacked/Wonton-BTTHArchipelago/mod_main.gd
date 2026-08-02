@@ -20,7 +20,7 @@ func install_script_extensions() -> void:
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/items/collectable.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/items/bat.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("global/global.gd"))
-	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("global/Save.gd"))
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("global/pause.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/location.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/respawn.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/respawn2.gd"))

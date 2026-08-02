@@ -2,6 +2,10 @@ extends "res://player/player.gd"
 
 const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:player.gd"
 
+func _ready() -> void:
+	super()
+	Global.instantiate_archipelago_notifications(self)
+
 func tilehit(a, id_no: int = 0):
 	var ret = super(a, id_no)
 	var can_use_block = true

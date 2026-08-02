@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://cg7i2xpf3rs2k"]
+
+[node name="ArchipelagoOverlay" type="CanvasLayer"]
+
+[node name="NotificationsContainer" type="VBoxContainer" parent="."]
+z_index = 10
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_bottom = 544.0
+grow_horizontal = 0

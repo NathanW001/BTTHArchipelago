@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://cxo5xumyb5kdu"]
+
+[ext_resource type="FontFile" uid="uid://bt6y8ivfmc5cl" path="res://font/Fredoka-Medium.ttf" id="1_wl1ap"]
+[ext_resource type="Script" path="res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_notification.gd" id="2_4hsaj"]
+[ext_resource type="FontFile" uid="uid://cmjg2iiohx2ui" path="res://font/Fredoka-Light.ttf" id="2_p8djd"]
+[ext_resource type="FontFile" uid="uid://bvawo1571pfq7" path="res://font/Fredoka-Bold.ttf" id="3_hfscd"]
+
+[node name="ArchipelagoNotification" type="RichTextLabel"]
+z_index = 8
+offset_right = 400.0
+offset_bottom = 150.0
+pivot_offset = Vector2(0, 75)
+size_flags_vertical = 0
+theme_override_colors/font_shadow_color = Color(1, 1, 1, 0.392157)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_outline_size = 1
+theme_override_fonts/normal_font = ExtResource("1_wl1ap")
+theme_override_fonts/italics_font = ExtResource("2_p8djd")
+theme_override_fonts/bold_italics_font = ExtResource("3_hfscd")
+theme_override_font_sizes/italics_font_size = 24
+theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/bold_font_size = 24
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+script = ExtResource("2_4hsaj")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+z_index = -1
+layout_mode = 0
+offset_right = 800.0
+offset_bottom = 400.0
+color = Color(0, 0, 0, 0.580392)

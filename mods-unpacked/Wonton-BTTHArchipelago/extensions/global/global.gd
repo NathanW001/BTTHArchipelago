@@ -2,6 +2,9 @@ extends "res://global/global.gd"
 
 const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:global.gd"
 
+var archipelago_overlay = load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_overlay.tscn")
+var archipelago_notification= load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_notification.tscn")
+
 var archipelago_internal_item_to_location_map = {
 	## Fizzies
 	"challenge_1": 0, # "Fizzy - left of Mola Town"
@@ -254,9 +257,8 @@ var all_archipelago_items = ["ball_power", "wave_dash_power", "yellow_fence", "j
 							 "super_jump_block", "float_block"]
 var owned_archipelago_items = []
 
-#var missing_locations = []
-#var checked_locations = []
-#var recieved_items = []
+var archipelago_missing_locations = []
+var archipelago_checked_locations = []
 var deathlink = false
 
 var archipelago_url = ""
@@ -265,7 +267,27 @@ var archipelago_web_socket = WebSocketPeer.new()
 var archipelago_connected = false
 var archipelago_auth_attempted = false
 var archipelago_authenticated = false # true after Connect packet is accepted
+var archipelago_gamestate_loaded = false
+var archipelago_hint_points = 0
 
+var archipelago_notification_parent: Node = null
+
+var archipelago_server_command_buffer = []
+
+var archipelago_notification_queue = []
+
+var archipelago_json_color_open_mapping = {
+	"bold": ["[b]", "[/b]"],
+	"underline": ["[u]", "[/u]"],
+	"black": ["", ""], # left unmapped bc it looks bad
+	"red": ["[color=red]", "[/color]"],
+	"green": ["[color=green]", "[/color]"],
+	"yellow": ["[color=yellow]", "[/color]"],
+	"blue": ["[color=blue]", "[/color]"],
+	"magenta": ["[color=magenta]", "[/color]"],
+	"cyan": ["[color=cyan]", "[/color]"],
+	"white": ["[color=white]", "[/color]"],
+}
 
 var archipelago_network_version = {
 	"class": "Version",
@@ -278,7 +300,7 @@ var archipelago_connect_packet = {
 	"cmd": "Connect",
 	"password": "",
 	"game": "Bat to the Heavens",
-	"name": "test1",
+	"name": "",
 	"uuid": "",
 	"version": archipelago_network_version,
 	"items_handling": 0b111,
@@ -286,21 +308,51 @@ var archipelago_connect_packet = {
 	"slot_data": true,
 }
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	super()
+	
+func newgame() -> void:
+	super()
+	Global.archipelago_gamestate_loaded = true
+
+func instantiate_archipelago_notifications(base_scene: Node) -> void: 
+	var archipelago_notifs = archipelago_overlay.instantiate()
+	base_scene.add_child(archipelago_notifs)
+	archipelago_notification_parent = archipelago_notifs.get_child(0)
+	
+
+func fade_out_notif(notif: Node) -> void:
+	await get_tree().create_timer(5).timeout
+	var tween = get_tree().create_tween()
+	tween.tween_property(notif, "modulate", Color.TRANSPARENT, 1.0)
+	#tween.tween_callback(notif.queue_free)
+	await get_tree().create_timer(1).timeout
+	notif.queue_free()
+
 
 func connect_to_archipelago() -> void:
-	var err = archipelago_web_socket.connect_to_url(archipelago_url + ":" + str(archipelago_port))
-	if err == OK:
-		ModLoaderLog.info("Connecting to " + str(archipelago_web_socket), WONTON_BTTHARCHIPELAGO_LOG_NAME)
-		archipelago_connected = true
-	else:
-		ModLoaderLog.error("> Unable to connect.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	if !archipelago_connected:
+		ModLoaderLog.info("url = " + archipelago_url + " port = " + str(archipelago_port), WONTON_BTTHARCHIPELAGO_LOG_NAME)
+		var err = archipelago_web_socket.connect_to_url(archipelago_url + ":" + str(archipelago_port))
+		if err == OK:
+			ModLoaderLog.info("Connecting to " + str(archipelago_web_socket), WONTON_BTTHARCHIPELAGO_LOG_NAME)
+			archipelago_connected = true
+		else:
+			ModLoaderLog.error("Unable to connect.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 		
 func _process(_delta):
 	super(_delta)
+	if archipelago_notification_parent != null:
+		while len(archipelago_notification_queue) > 0:
+			var notif = archipelago_notification_queue.pop_front()
+			archipelago_notification_parent.add_child(notif)
+	
 	if archipelago_connected:
+		if archipelago_authenticated and archipelago_gamestate_loaded:
+			for command in archipelago_server_command_buffer:
+				ModLoaderLog.info("running buffer command", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+				process_server_command(command)
+			archipelago_server_command_buffer = []
 		archipelago_web_socket.poll()
 		var state = archipelago_web_socket.get_ready_state()
 		# `WebSocketPeer.STATE_OPEN` means the socket is connected and ready
@@ -332,6 +384,7 @@ func _process(_delta):
 			# The code will be `-1` if the disconnection was not properly notified by the remote peer.
 			var code = archipelago_web_socket.get_close_code()
 			ModLoaderLog.info("WebSocket closed with code: %d. Clean: %s" % [code, code != -1], WONTON_BTTHARCHIPELAGO_LOG_NAME)
+			archipelago_web_socket = WebSocketPeer.new() #refresh by making a new socket
 			archipelago_connected = false
 
 func server_process_raw_json(json_string):
@@ -340,46 +393,70 @@ func server_process_raw_json(json_string):
 	if err == OK:
 		var data_received = json.data
 		for command in data_received:
-			match command["cmd"]:
-				"RoomInfo":
-					server_room_info(command)
-				"ConnectionRefused":
-					server_connection_refused(command)
-				"Connected":
-					server_connected(command)
-				"ReceivedItems":
-					server_received_items(command)
-				"LocationInfo":
-					server_location_info(command)
-				"RoomUpdate":
-					server_room_update(command)
-				"PrintJSON":
-					server_print_json(command)
-				"DataPackage":
-					server_data_package(command)
-				"Bounced":
-					server_bounced(command)
-				"InvalidPacket":
-					server_invalid_packet(command)
-				"Retrieved":
-					server_retrieved(command)
-				"SetReply":
-					server_set_reply(command)
+			if !archipelago_authenticated or !archipelago_gamestate_loaded:
+				if command["cmd"] == "Connected" or command["cmd"] == "ConnectionRefused":
+					process_server_command(command)
+				else:
+					archipelago_server_command_buffer.append(command)
+			else:
+				process_server_command(command)
 	else:
 		ModLoaderLog.error("JSON Parse error from WebSocket message", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 
+func process_server_command(command):
+	match command["cmd"]:
+		"RoomInfo":
+			server_room_info(command)
+		"ConnectionRefused":
+			server_connection_refused(command)
+		"Connected":
+			server_connected(command)
+		"ReceivedItems":
+			server_received_items(command)
+		"LocationInfo":
+			server_location_info(command)
+		"RoomUpdate":
+			server_room_update(command)
+		"PrintJSON":
+			server_print_json(command)
+		"DataPackage":
+			server_data_package(command)
+		"Bounced":
+			server_bounced(command)
+		"InvalidPacket":
+			server_invalid_packet(command)
+		"Retrieved":
+			server_retrieved(command)
+		"SetReply":
+			server_set_reply(command)
+
+
 ## Functions for Receiveing from Server
 func server_room_info(json_data):
+	ModLoaderLog.info("Received command \"RoomInfo\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 
 func server_connection_refused(json_data):
-	pass
+	ModLoaderLog.info("Received command \"ConnectionRefused\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	archipelago_authenticated = false
+	archipelago_auth_attempted = false
+	archipelago_connected = false
+	archipelago_server_command_buffer = []
+	archipelago_web_socket.close()
+	ModLoaderLog.info("Connection refused by server.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_connected(json_data):
+	ModLoaderLog.info("Received command \"Connected\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	archipelago_authenticated = true
+	for location in json_data["missing_locations"]:
+		archipelago_missing_locations.append(int(location))
+	for location in json_data["checked_locations"]:
+		archipelago_checked_locations.append(int(location))
+	archipelago_hint_points = json_data["hint_points"]
 	ModLoaderLog.info("Successfully connected to slot.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_received_items(json_data):
+	ModLoaderLog.info("Received command \"RecievedItems\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	for item in json_data["items"]:
 		var item_number = int(item["item"]) # may be from float with the way json parses 
 		if item_number < 10000: # Bat giving logic
@@ -414,72 +491,106 @@ func server_received_items(json_data):
 				owned_archipelago_items.append(item_id)
 	
 func server_location_info(json_data):
+	ModLoaderLog.info("Received command \"LocationInfo\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_print_json(json_data):
-	ModLoaderLog.info(json_data["data"][0]["text"], "Server JSON")
-	pass
+	ModLoaderLog.info("Received command \"PrintJson\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	var output_string_parts = []
+	for json_message_part in json_data["data"]:
+		output_string_parts.append(json_message_part["text"])
+	var archipelago_notification_node = archipelago_notification.instantiate()
+	archipelago_notification_node.text = ''.join(output_string_parts)
+	archipelago_notification_queue.append(archipelago_notification_node)
 	
 func server_room_update(json_data):
+	ModLoaderLog.info("Received command \"RoomUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_data_package(json_data):
+	ModLoaderLog.info("Received command \"DataPackage\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_bounced(json_data):
+	ModLoaderLog.info("Received command \"Bounced\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_invalid_packet(json_data):
+	ModLoaderLog.info("Received command \"InvalidPacket\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_retrieved(json_data):
+	ModLoaderLog.info("Received command \"Retrieved\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func server_set_reply(json_data):
+	ModLoaderLog.info("Received command \"SetReply\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 
 ## Functions for Sending to Server
 func client_connect():
+	ModLoaderLog.info("Sent command \"Connect\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 
 func client_connect_update():
+	ModLoaderLog.info("Sent command \"ConnectUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_sync():
+	ModLoaderLog.info("Sent command \"Sync\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_location_checks(locations):
+	ModLoaderLog.info("Sent command \"LocationChecks\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	if archipelago_connected:
+		var unchecked_locations = []
+		for location in locations:
+			if location not in archipelago_checked_locations:
+				unchecked_locations.append(location)
+		if len(unchecked_locations) == 0:
+			ModLoaderLog.info("Locations are already checked", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+			return
 		ModLoaderLog.info("Sent location check(s) " + str(locations), WONTON_BTTHARCHIPELAGO_LOG_NAME)
-		var json_location_checks = JSON.stringify([{"cmd": "LocationChecks", "locations": locations}])
+		var json_location_checks = JSON.stringify([{"cmd": "LocationChecks", "locations": unchecked_locations}])
 		archipelago_web_socket.send_text(json_location_checks)
+		archipelago_checked_locations.append_array(unchecked_locations)
 	
 func client_location_scouts():
+	ModLoaderLog.info("Sent command \"LocationScouts\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_create_hints():
+	ModLoaderLog.info("Sent command \"CreateHints\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_update_hint():
+	ModLoaderLog.info("Sent command \"UpdateHint\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_status_update():
+	ModLoaderLog.info("Sent command \"StatusUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_say():
+	ModLoaderLog.info("Sent command \"Say\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_get_data_package():
+	ModLoaderLog.info("Sent command \"GetDataPackage\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_bounce():
+	ModLoaderLog.info("Sent command \"Bounce\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_get():
+	ModLoaderLog.info("Sent command \"Get\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_set():
+	ModLoaderLog.info("Sent command \"Set\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
 func client_set_notify():
+	ModLoaderLog.info("Sent command \"SetNotify\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
