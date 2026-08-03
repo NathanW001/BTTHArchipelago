@@ -162,17 +162,17 @@ def connect_regions(world: World) -> None:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player))
+         state.has(names.momentum_launcher, world.player))
     )
     connect(world, world.player, region_names, names.mola_town, names.jalta_dregs, mola_town_to_jalta_dregs)
     mola_town_to_sand_hell = lambda state: (
-        (has_a_normal_bat(state))
+        (has_a_normal_bat(state) and
+         state.has(names.jump_block, world.player) and
+         state.has(names.master_key, world.player))
     )
     connect(world, world.player, region_names, names.mola_town, names.sand_hell, mola_town_to_sand_hell)
     mola_town_to_warp_room = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.mola_town, names.warp_room, mola_town_to_warp_room)
     # Since the default bat is technically located in Belwheat Valley, we need the condition to be None to
@@ -248,9 +248,7 @@ def connect_regions(world: World) -> None:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.momentum_launcher, world.player))
     )
     connect(world, world.player, region_names, names.eroded_beach, names.port_naga, eroded_beach_to_port_naga)
 
@@ -258,9 +256,7 @@ def connect_regions(world: World) -> None:
     port_naga_to_basin_21 = lambda state: (
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
-         state.has(names.jump_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.jump_block, world.player))
     )
     connect(world, world.player, region_names, names.port_naga, names.basin_21, port_naga_to_basin_21)
 
@@ -269,9 +265,7 @@ def connect_regions(world: World) -> None:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.momentum_launcher, world.player))
     )
     
     connect(world, world.player, region_names, names.basin_21, names.pastel_strata, basin_21_to_pastel_strata)
@@ -279,9 +273,7 @@ def connect_regions(world: World) -> None:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.momentum_launcher, world.player))
     )
     connect(world, world.player, region_names, names.basin_21, names.abandoned_district, basin_21_to_abandoned_district)
 
@@ -291,14 +283,11 @@ def connect_regions(world: World) -> None:
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player) and
-         state.has(names.vector_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.vector_block, world.player))
     )
     connect(world, world.player, region_names, names.pastel_strata, names.astral_tower, pastel_strata_to_astral_tower)
     pastel_strata_to_creacher_cave = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.pastel_strata, names.creacher_cave, pastel_strata_to_creacher_cave)
 
@@ -308,9 +297,7 @@ def connect_regions(world: World) -> None:
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player) and
-         state.has(names.vector_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.vector_block, world.player))
     )
     connect(world, world.player, region_names, names.astral_tower, names.precipice_bridge, astral_tower_to_precipice_bridge)
 
@@ -321,27 +308,22 @@ def connect_regions(world: World) -> None:
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player) and
          state.has(names.vector_block, world.player) and
-         state.has(names.charge_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.charge_block, world.player))
     )
     connect(world, world.player, region_names, names.precipice_bridge, names.terminus, precipice_bridge_to_terminus)
     precipice_bridge_to_villiths_drain = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.precipice_bridge, names.villiths_drain, precipice_bridge_to_villiths_drain)
     precipice_bridge_to_satellite_ranch = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.precipice_bridge, names.satellite_ranch, precipice_bridge_to_satellite_ranch)
     precipice_bridge_to_abandoned_district = lambda state: (
         (has_a_normal_bat(state) and
-         state.has(names.yellow_fence, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.yellow_fence, world.player))
     )
+    connect(world, world.player, region_names, names.precipice_bridge, names.abandoned_district, precipice_bridge_to_abandoned_district)
 
     # Connections from Terminus
     terminus_to_terminal_station = lambda state: (
@@ -355,9 +337,7 @@ def connect_regions(world: World) -> None:
          state.has(names.momentum_launcher, world.player) and
          state.has(names.vector_block, world.player) and
          state.has(names.charge_block, world.player) and
-         state.has(names.super_jump_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.super_jump_block, world.player))
     )
     connect(world, world.player, region_names, names.terminus, names.heavens_channel, terminus_to_heavens_channel)
 
@@ -370,8 +350,6 @@ def connect_regions(world: World) -> None:
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player) and
          state.has(names.roller_blades, world.player))
     )
     connect(world, world.player, region_names, names.jalta_dregs, names.ediface_roots, jalta_dregs_to_ediface_roots)
@@ -389,9 +367,7 @@ def connect_regions(world: World) -> None:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.charge_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.charge_block, world.player))
     )
     connect(world, world.player, region_names, names.abandoned_district, names.power_room, abandoned_district_to_power_room)
 
@@ -407,21 +383,17 @@ def connect_regions(world: World) -> None:
          state.has(names.vector_block, world.player) and
          state.has(names.charge_block, world.player) and
          state.has(names.super_jump_block, world.player) and
-         state.has(names.float_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player))
+         state.has(names.float_block, world.player))
     )
     connect(world, world.player, region_names, names.villiths_drain, names.false_field, villiths_drain_to_false_field)
     villiths_drain_to_drain_room = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.villiths_drain, names.drain_room, villiths_drain_to_drain_room)
 
     # Connections from False Field
     false_field_to_plateau_underside = lambda state: (
-        (has_a_normal_bat(state) and
-         state.has(names.ball_power, world.player))
+        (has_a_normal_bat(state))
     )
     connect(world, world.player, region_names, names.false_field, names.plateau_underside, false_field_to_plateau_underside)
 
@@ -450,8 +422,6 @@ def connect_regions(world: World) -> None:
          state.has(names.charge_block, world.player) and
          state.has(names.super_jump_block, world.player) and
          state.has(names.float_block, world.player) and
-         state.has(names.ball_power, world.player) and
-         state.has(names.wave_dash_power, world.player) and
          state.has(names.roller_blades, world.player)
          )
     )

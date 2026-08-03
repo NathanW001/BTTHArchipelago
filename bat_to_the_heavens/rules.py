@@ -45,8 +45,7 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
         (has_a_normal_bat(state) and
          state.has(names.yellow_fence, world.player) and
          state.has(names.jump_block, world.player) and
-         state.has(names.momentum_launcher, world.player) and
-         state.has(names.ball_power, world.player)) or
+         state.has(names.momentum_launcher, world.player)) or
         (state.has(names.phant_bat, world.player))
     )
 
@@ -54,7 +53,7 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
     # Note: since you can make it into Belwheat Valley area trigger the requirement to get here is None, everything else
     # here that isn't the bat will have to require the bat. Nothing here requires yellow fences, there's a steam 
     # achievement for completing the area without using them. I also personally verified that the fizzy doesn't need
-    # them either, nor ball, nor wavedash.
+    # them either.
     location_logic_mapping[names.fizzy_belwheat_valley_1] = has_a_normal_bat
     location_logic_mapping[names.collect_postcard_belwheat_valley] = has_a_normal_bat
     location_logic_mapping[names.checkpoint_1_belwheat_valley] = has_a_normal_bat

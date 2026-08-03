@@ -14,12 +14,12 @@ class BTTHItem(Item):
     game = "Bat to the Heavens"
 
 bat_table = {
-    names.default_bat: ItemData(0, True, useful=True),
-    names.angel_bat: ItemData(1, True, useful=True),
-    names.fizzy_bat: ItemData(2, True, useful=True),
-    names.phant_bat: ItemData(3, True, useful=True),
-    names.power_bat: ItemData(4, True, useful=True),
-    names.pink_bat: ItemData(5, True, useful=True),
+    names.default_bat: ItemData(1, True, useful=True),
+    names.angel_bat: ItemData(2, True, useful=True),
+    names.fizzy_bat: ItemData(3, True, useful=True),
+    names.phant_bat: ItemData(4, True, useful=True),
+    names.power_bat: ItemData(5, True, useful=True),
+    names.pink_bat: ItemData(6, True, useful=True),
 }
 
 collectable_table = {
@@ -46,8 +46,6 @@ equipment_table = {
     names.train_ticket: ItemData(20002, True),
     names.roller_blades: ItemData(20003, True, useful=True),
     names.baseball_cap: ItemData(20004, False, useful=True),
-    names.ball_power: ItemData(20005, True, useful=True),
-    names.wave_dash_power: ItemData(20006, True, useful=True),
 }
 
 world_block_table = {

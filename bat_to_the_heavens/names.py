@@ -33,8 +33,6 @@ master_key = "Master Key"
 train_ticket = "Train Ticket"
 roller_blades = "Roller Blades"
 baseball_cap = "Baseball Cap"
-ball_power = "Ball Power"
-wave_dash_power = "Wave Dash Power"
 
 # Blocks in the world, Item Code 3xxxx
 yellow_fence = "Yellow Fence"
