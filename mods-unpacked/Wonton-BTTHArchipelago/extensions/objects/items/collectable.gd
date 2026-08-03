@@ -4,6 +4,8 @@ const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:object.gd"
 
 func _ready() -> void:
 	#super()
+	if Global.archipelago_internal_item_to_location_map[item_no] in Global.archipelago_checked_locations:
+		queue_free()
 	#ModLoaderLog.info(str(find_child("Sprite2D").frame_coords), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	var default_texture = load("res://mods-unpacked/Wonton-BTTHArchipelago/overwrites/sprite/objects/postcarditem.png")
 	var current_node_sprite = find_child("Sprite2D")

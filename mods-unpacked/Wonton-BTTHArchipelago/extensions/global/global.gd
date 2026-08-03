@@ -19,7 +19,8 @@ var archipelago_internal_item_to_location_map = {
 	"challenge_9": 9, # "Fizzy - platforming puzzle at the end of the Eroded Beach"
 	"challenge_11": 10, # "Fizzy - platform above Observer in Port Naga"
 	"challenge_10": 11, # "Fizzy - isolated platform to the left of Port Naga"
-	# Port Naga Arcade fizzies (12 and 13) aren't checks in the world
+	"challenge_19": 12,  # "Fizzy - baseball minigame in Port Naga"
+	"challenge_20": 13, # "Fizzy - jellon minigame in Port Naga"
 	"challenge_12": 14, # "Fizzy - at the entrance to the puzzle in the top of Basin 21"
 	"challenge_13": 15, # "Fizzy - at the end of the long platforming puzzle in Basin 21"
 	"challenge_14": 16, # "Fizzy - underneath the Phant room in Pastel Strata"
@@ -39,7 +40,7 @@ var archipelago_internal_item_to_location_map = {
 	"map_pastel_strata": 10009,
 	"map_precipice_bridge": 10010,
 	"map_villiths_drain": 10011,
-	# Butter's contact card is not found in the world
+	"card_butter": 10012,
 	## Phants
 	"phant_1": 20000,
 	"phant_2": 20001,
@@ -57,7 +58,8 @@ var archipelago_internal_item_to_location_map = {
 	## Bats
 	"bat": 40000,
 	"angelbat": 40001,
-	# Phant bat and Fizzy bat aren't located in the world
+	"fizzybat": 40002,
+	"largebat": 40003,
 	"godbat": 40004,
 	"pinkbat": 40005,
 }
@@ -235,6 +237,7 @@ var archipelago_checkpoint_mapping = {
 	"checkpoint_X_9": 60080,
 	"checkpoint_X_10": 60081,
 }
+var archipelago_inverse_checkpoint_mapping = {60000: 'checkpoint0_1', 60001: 'checkpoint0_2', 60002: 'checkpoint1_1', 60003: 'checkpoint1_2', 60004: 'checkpoint1_3', 60005: 'checkpoint1_4', 60006: 'checkpoint2_1', 60007: 'checkpoint2_2', 60008: 'checkpoint2_3', 60009: 'checkpoint2_4', 60010: 'checkpoint2_5', 60011: 'checkpoint2_6', 60012: 'checkpoint3_1', 60013: 'checkpoint3_2', 60014: 'checkpoint3_3', 60015: 'checkpoint4_1', 60016: 'checkpoint4_2', 60017: 'checkpoint4_3', 60018: 'checkpoint4_4', 60019: 'checkpoint4_5', 60020: 'checkpoint4_6', 60021: 'checkpoint5_1', 60022: 'checkpoint5_2', 60023: 'checkpoint5_3', 60024: 'checkpoint5_4', 60025: 'checkpoint5_5', 60026: 'checkpoint6_1', 60027: 'checkpoint6_2', 60028: 'checkpoint6_3', 60029: 'checkpoint6_4', 60030: 'checkpoint6_5', 60031: 'checkpoint6_6', 60032: 'checkpointN_1', 60033: 'checkpointN_2', 60034: 'checkpoint7_1', 60035: 'checkpoint7_2', 60036: 'checkpoint7_3', 60037: 'checkpoint7_4', 60038: 'checkpoint7_5', 60039: 'checkpoint7_6', 60040: 'checkpoint7_7', 60041: 'checkpoint8_1', 60042: 'checkpoint8_2', 60043: 'checkpoint8_3', 60044: 'checkpoint8_4', 60045: 'checkpoint8_5', 60046: 'checkpoint8_6', 60047: 'checkpoint8_7', 60048: 'checkpoint8_8', 60049: 'checkpoint8_9', 60050: 'checkpoint9_1', 60051: 'checkpoint9_2', 60052: 'checkpoint9_3', 60053: 'checkpoint9_4', 60054: 'checkpoint9_5', 60055: 'checkpoint9_6', 60056: 'checkpoint9_7', 60057: 'checkpoint9_8', 60058: 'checkpoint9_9', 60059: 'checkpoint10_1', 60060: 'checkpoint10_2', 60061: 'checkpointU_1', 60062: 'checkpointU_2', 60063: 'checkpointU_3', 60064: 'checkpointU_4', 60065: 'checkpointU_5', 60066: 'checkpointU_6', 60067: 'checkpointU_7', 60068: 'checkpointU_8', 60069: 'checkpointU_9', 60070: 'checkpointU_10', 60071: 'checkpointU_11', 60072: 'checkpoint_X_1', 60073: 'checkpoint_X_2', 60074: 'checkpoint_X_3', 60075: 'checkpoint_X_4', 60076: 'checkpoint_X_5', 60077: 'checkpoint_X_6', 60078: 'checkpoint_X_7', 60079: 'checkpoint_X_8', 60080: 'checkpoint_X_9', 60081: 'checkpoint_X_10'}
 
 var internal_block_id_to_archipelago_item = {
 	7: "yellow_fence",
@@ -264,10 +267,12 @@ var deathlink = false
 var archipelago_url = ""
 var archipelago_port = -1
 var archipelago_web_socket = WebSocketPeer.new()
-var archipelago_connected = false
-var archipelago_auth_attempted = false
-var archipelago_authenticated = false # true after Connect packet is accepted
-var archipelago_gamestate_loaded = false
+var archipelago_connected = false # Connection to socket established
+var archipelago_data_package_requested = false # sent request for GetDataPackage
+var archipelago_data_package_received = false # set true after we've gotten the data package
+var archipelago_auth_attempted = false # set true after Conncet packet is sent to server
+var archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
+var archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 var archipelago_hint_points = 0
 
 var archipelago_notification_parent: Node = null
@@ -275,6 +280,10 @@ var archipelago_notification_parent: Node = null
 var archipelago_server_command_buffer = []
 
 var archipelago_notification_queue = []
+
+var archipelago_data_package = {}
+
+signal archipelago_data_package_received_signal
 
 var archipelago_json_color_open_mapping = {
 	"bold": ["[b]", "[/b]"],
@@ -288,6 +297,8 @@ var archipelago_json_color_open_mapping = {
 	"cyan": ["[color=cyan]", "[/color]"],
 	"white": ["[color=white]", "[/color]"],
 }
+
+var archipelago_player_slot_info = {}
 
 var archipelago_network_version = {
 	"class": "Version",
@@ -314,12 +325,18 @@ func _ready() -> void:
 func newgame() -> void:
 	super()
 	Global.archipelago_gamestate_loaded = true
+	for location in archipelago_checked_locations:
+		location = int(location)
+		if location >= 60000:
+			var location_checkpoint_name = archipelago_inverse_checkpoint_mapping[location]
+			set_collect("checkpoints", location_checkpoint_name, 1.0)
+			set_collect("checkpoints_deaths", location_checkpoint_name, 0.0)
+			Global.info["currentcheckpoint"] = location_checkpoint_name
 
 func instantiate_archipelago_notifications(base_scene: Node) -> void: 
 	var archipelago_notifs = archipelago_overlay.instantiate()
 	base_scene.add_child(archipelago_notifs)
 	archipelago_notification_parent = archipelago_notifs.get_child(0)
-	
 
 func fade_out_notif(notif: Node) -> void:
 	await get_tree().create_timer(5).timeout
@@ -327,8 +344,8 @@ func fade_out_notif(notif: Node) -> void:
 	tween.tween_property(notif, "modulate", Color.TRANSPARENT, 1.0)
 	#tween.tween_callback(notif.queue_free)
 	await get_tree().create_timer(1).timeout
-	notif.queue_free()
-
+	if is_instance_valid(notif):
+		notif.queue_free()
 
 func connect_to_archipelago() -> void:
 	if !archipelago_connected:
@@ -367,10 +384,10 @@ func _process(_delta):
 				else:
 					#ModLoaderLog.info("< Got binary data from server: %d bytes" % packet.size(), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 					pass
-			if !archipelago_auth_attempted:
-				var json_connect_info = JSON.stringify([archipelago_connect_packet])
-				archipelago_web_socket.send_text(json_connect_info)
-				archipelago_auth_attempted = true
+			if !archipelago_data_package_requested:
+				client_get_data_package(["Bat to the Heavens"])
+			elif !archipelago_auth_attempted and archipelago_data_package_requested:
+				client_connect()
 			
 
 		# `WebSocketPeer.STATE_CLOSING` means the socket is closing.
@@ -394,7 +411,7 @@ func server_process_raw_json(json_string):
 		var data_received = json.data
 		for command in data_received:
 			if !archipelago_authenticated or !archipelago_gamestate_loaded:
-				if command["cmd"] == "Connected" or command["cmd"] == "ConnectionRefused":
+				if command["cmd"] == "Connected" or command["cmd"] == "ConnectionRefused" or command["cmd"] == "DataPackage":
 					process_server_command(command)
 				else:
 					archipelago_server_command_buffer.append(command)
@@ -452,6 +469,7 @@ func server_connected(json_data):
 		archipelago_missing_locations.append(int(location))
 	for location in json_data["checked_locations"]:
 		archipelago_checked_locations.append(int(location))
+	archipelago_player_slot_info = json_data["slot_info"]
 	archipelago_hint_points = json_data["hint_points"]
 	ModLoaderLog.info("Successfully connected to slot.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
@@ -498,7 +516,32 @@ func server_print_json(json_data):
 	ModLoaderLog.info("Received command \"PrintJson\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	var output_string_parts = []
 	for json_message_part in json_data["data"]:
-		output_string_parts.append(json_message_part["text"])
+		if "type" in json_message_part and json_message_part["type"] == "player_id":
+			output_string_parts.append(archipelago_player_slot_info[json_message_part["text"]]["name"])
+		elif "type" in json_message_part and json_message_part["type"] == "item_id":
+			var item_game_name = archipelago_player_slot_info[str(json_message_part["player"])]["game"]
+			if item_game_name in archipelago_data_package:
+				output_string_parts.append(archipelago_data_package[item_game_name]["id_to_item_name"][json_message_part["text"]])
+			else:
+				client_get_data_package([item_game_name])
+				await archipelago_data_package_received_signal
+				if item_game_name in archipelago_data_package:
+					output_string_parts.append(archipelago_data_package[item_game_name]["id_to_item_name"][json_message_part["text"]])
+				else:
+					output_string_parts.append(json_message_part["text"])
+		elif "type" in json_message_part and json_message_part["type"] == "location_id":
+			var location_game_name = archipelago_player_slot_info[str(json_message_part["player"])]["game"]
+			if location_game_name in archipelago_data_package:
+				output_string_parts.append(archipelago_data_package[location_game_name]["id_to_location_name"][json_message_part["text"]])
+			else:
+				client_get_data_package([location_game_name])
+				await archipelago_data_package_received_signal
+				if location_game_name in archipelago_data_package:
+					output_string_parts.append(archipelago_data_package[location_game_name]["id_to_location_name"][json_message_part["text"]])
+				else:
+					output_string_parts.append(json_message_part["text"])
+		else:
+			output_string_parts.append(json_message_part["text"])
 	var archipelago_notification_node = archipelago_notification.instantiate()
 	archipelago_notification_node.text = ''.join(output_string_parts)
 	archipelago_notification_queue.append(archipelago_notification_node)
@@ -509,7 +552,17 @@ func server_room_update(json_data):
 	
 func server_data_package(json_data):
 	ModLoaderLog.info("Received command \"DataPackage\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	for game in json_data["data"]["games"].keys():
+		var id_to_item_name = {}
+		for dict_item in json_data["data"]["games"][game]["item_name_to_id"]:
+			id_to_item_name[str(json_data["data"]["games"][game]["item_name_to_id"][dict_item])] = dict_item
+		var id_to_location_name = {}
+		for dict_item in json_data["data"]["games"][game]["location_name_to_id"]:
+			id_to_location_name[str(json_data["data"]["games"][game]["location_name_to_id"][dict_item])] = dict_item
+			
+		archipelago_data_package[game] = {"id_to_item_name": id_to_item_name, "id_to_location_name": id_to_location_name}
+	archipelago_data_package_received = true
+	archipelago_data_package_received_signal.emit()
 	
 func server_bounced(json_data):
 	ModLoaderLog.info("Received command \"Bounced\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -530,7 +583,9 @@ func server_set_reply(json_data):
 ## Functions for Sending to Server
 func client_connect():
 	ModLoaderLog.info("Sent command \"Connect\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	var json_connect_info = JSON.stringify([archipelago_connect_packet])
+	archipelago_web_socket.send_text(json_connect_info)
+	archipelago_auth_attempted = true
 
 func client_connect_update():
 	ModLoaderLog.info("Sent command \"ConnectUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -567,17 +622,21 @@ func client_update_hint():
 	ModLoaderLog.info("Sent command \"UpdateHint\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
-func client_status_update():
+func client_status_update(status: String):
 	ModLoaderLog.info("Sent command \"StatusUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	if status == "goal":
+		var json_status_update_package = JSON.stringify([{"cmd": "StatusUpdate", "status": 30}])
+		archipelago_web_socket.send_text(json_status_update_package)
 	
 func client_say():
 	ModLoaderLog.info("Sent command \"Say\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
 	
-func client_get_data_package():
+func client_get_data_package(game_names):
 	ModLoaderLog.info("Sent command \"GetDataPackage\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	var json_get_data_package = JSON.stringify([{"cmd": "GetDataPackage", "games": game_names}])
+	archipelago_web_socket.send_text(json_get_data_package)
+	archipelago_data_package_requested = true
 	
 func client_bounce():
 	ModLoaderLog.info("Sent command \"Bounce\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
