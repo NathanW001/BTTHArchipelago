@@ -7,26 +7,26 @@ var archipelago_notification= load("res://mods-unpacked/Wonton-BTTHArchipelago/n
 
 var archipelago_internal_item_to_location_map = {
 	## Fizzies
-	"challenge_1": 0, # "Fizzy - left of Mola Town"
-	"challenge_18": 1, # "Fizzy - on the climb to Jalta Dregs"
-	"challenge_2": 2, # "Fizzy - hidden pit in Belwheat Valley"
-	"challenge_3": 3, # "Fizzy - at the top of the GC Warehouse"
-	"challenge_4": 4, # "Fizzy - above a checkpoint in the Entrance Ruins"
-	"challenge_5": 5, # "Fizzy - platforming puzzle in the top left of the Entrance Ruins"
-	"challenge_6": 6, # "Fizzy - lava tunnel in the GC Factory"
-	"challenge_7": 7, # "Fizzy - island on the Cliff Face"
-	"challenge_8": 8, # "Fizzy - platforming puzzle in the top right of the Forest Cavern"
-	"challenge_9": 9, # "Fizzy - platforming puzzle at the end of the Eroded Beach"
-	"challenge_11": 10, # "Fizzy - platform above Observer in Port Naga"
-	"challenge_10": 11, # "Fizzy - isolated platform to the left of Port Naga"
-	"challenge_19": 12,  # "Fizzy - baseball minigame in Port Naga"
-	"challenge_20": 13, # "Fizzy - jellon minigame in Port Naga"
-	"challenge_12": 14, # "Fizzy - at the entrance to the puzzle in the top of Basin 21"
-	"challenge_13": 15, # "Fizzy - at the end of the long platforming puzzle in Basin 21"
-	"challenge_14": 16, # "Fizzy - underneath the Phant room in Pastel Strata"
-	"challenge_15": 17, # "Fizzy - puzzle in the middle of the Precipice Bridge"
-	"challenge_16": 18, # "Fizzy - behind the glass at the end of the Precipice Bridge"
-	"challenge_17": 19, # "Fizzy - hidden room behind a checkpoint in Villith's Drain"
+	"challenge_1": 1, # "Fizzy - left of Mola Town"
+	"challenge_18": 2, # "Fizzy - on the climb to Jalta Dregs"
+	"challenge_2": 3, # "Fizzy - hidden pit in Belwheat Valley"
+	"challenge_3": 4, # "Fizzy - at the top of the GC Warehouse"
+	"challenge_4": 5, # "Fizzy - above a checkpoint in the Entrance Ruins"
+	"challenge_5": 6, # "Fizzy - platforming puzzle in the top left of the Entrance Ruins"
+	"challenge_6": 7, # "Fizzy - lava tunnel in the GC Factory"
+	"challenge_7": 8, # "Fizzy - island on the Cliff Face"
+	"challenge_8": 9, # "Fizzy - platforming puzzle in the top right of the Forest Cavern"
+	"challenge_9": 10, # "Fizzy - platforming puzzle at the end of the Eroded Beach"
+	"challenge_11": 11, # "Fizzy - platform above Observer in Port Naga"
+	"challenge_10": 12, # "Fizzy - isolated platform to the left of Port Naga"
+	"challenge_19": 13,  # "Fizzy - baseball minigame in Port Naga"
+	"challenge_20": 14, # "Fizzy - jellon minigame in Port Naga"
+	"challenge_12": 15, # "Fizzy - at the entrance to the puzzle in the top of Basin 21"
+	"challenge_13": 16, # "Fizzy - at the end of the long platforming puzzle in Basin 21"
+	"challenge_14": 17, # "Fizzy - underneath the Phant room in Pastel Strata"
+	"challenge_15": 18, # "Fizzy - puzzle in the middle of the Precipice Bridge"
+	"challenge_16": 19, # "Fizzy - behind the glass at the end of the Precipice Bridge"
+	"challenge_17": 20, # "Fizzy - hidden room behind a checkpoint in Villith's Drain"
 	## Postcards
 	"map_mola_town": 10000,
 	"map_belwheat_valley": 10001,
@@ -65,12 +65,12 @@ var archipelago_internal_item_to_location_map = {
 }
 var archipelago_item_to_internal_item_map = {
 	## Bats
-	0: "bat",
-	1: "angelbat",
-	2: "fizzybat",
-	3: "largebat",
-	4: "godbat",
-	5: "pinkbat",
+	1: "bat",
+	2: "angelbat",
+	3: "fizzybat",
+	4: "largebat",
+	5: "godbat",
+	6: "pinkbat",
 	## Collectable
 	10000: "challenge_", # Fizzy, will append number later
 	10001: "phant_",
@@ -320,6 +320,7 @@ var archipelago_connect_packet = {
 }
 
 func _ready() -> void:
+	archipelago_web_socket.set_inbound_buffer_size(655350)
 	super()
 	
 func newgame() -> void:
@@ -352,10 +353,10 @@ func connect_to_archipelago() -> void:
 		ModLoaderLog.info("url = " + archipelago_url + " port = " + str(archipelago_port), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 		var err = archipelago_web_socket.connect_to_url(archipelago_url + ":" + str(archipelago_port))
 		if err == OK:
-			ModLoaderLog.info("Connecting to " + str(archipelago_web_socket), WONTON_BTTHARCHIPELAGO_LOG_NAME)
+			#ModLoaderLog.info("Connecting to " + str(archipelago_web_socket), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 			archipelago_connected = true
-		else:
-			ModLoaderLog.error("Unable to connect.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+		#else:
+			#ModLoaderLog.error("Unable to connect.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 		
 func _process(_delta):
 	super(_delta)
@@ -379,7 +380,7 @@ func _process(_delta):
 				var packet = archipelago_web_socket.get_packet()
 				if archipelago_web_socket.was_string_packet():
 					var packet_text = packet.get_string_from_utf8()
-					ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
+					#ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
 					server_process_raw_json(packet_text)
 				else:
 					#ModLoaderLog.info("< Got binary data from server: %d bytes" % packet.size(), WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -401,8 +402,7 @@ func _process(_delta):
 			# The code will be `-1` if the disconnection was not properly notified by the remote peer.
 			var code = archipelago_web_socket.get_close_code()
 			ModLoaderLog.info("WebSocket closed with code: %d. Clean: %s" % [code, code != -1], WONTON_BTTHARCHIPELAGO_LOG_NAME)
-			archipelago_web_socket = WebSocketPeer.new() #refresh by making a new socket
-			archipelago_connected = false
+			archipelago_server_disconnect_unexpected()
 
 func server_process_raw_json(json_string):
 	var json = JSON.new()
@@ -447,6 +447,71 @@ func process_server_command(command):
 		"SetReply":
 			server_set_reply(command)
 
+func archipelago_client_disconnect_gracefully() -> void:
+	archipelago_web_socket.close(1000, "Client requested disconnect.")
+	archipelago_url = ""
+	archipelago_port = -1
+	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_connected = false # Connection to socket established
+	archipelago_data_package_requested = false # sent request for GetDataPackage
+	archipelago_data_package_received = false # set true after we've gotten the data package
+	archipelago_auth_attempted = false # set true after Conncet packet is sent to server
+	archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
+	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
+	archipelago_hint_points = 0
+	owned_archipelago_items = []
+	archipelago_missing_locations = []
+	archipelago_checked_locations = []
+	deathlink = false
+	archipelago_notification_parent = null
+	archipelago_server_command_buffer = []
+	archipelago_notification_queue = []
+	archipelago_data_package = {}
+	archipelago_player_slot_info = {}
+	archipelago_connect_packet = {
+		"cmd": "Connect",
+		"password": "",
+		"game": "Bat to the Heavens",
+		"name": "",
+		"uuid": "",
+		"version": archipelago_network_version,
+		"items_handling": 0b111,
+		"tags": [],
+		"slot_data": true,
+	}
+	
+func archipelago_server_disconnect_unexpected() -> void:
+	archipelago_web_socket.close(-1)
+	archipelago_url = ""
+	archipelago_port = -1
+	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_connected = false # Connection to socket established
+	archipelago_data_package_requested = false # sent request for GetDataPackage
+	archipelago_data_package_received = false # set true after we've gotten the data package
+	archipelago_auth_attempted = false # set true after Conncet packet is sent to server
+	archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
+	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
+	archipelago_hint_points = 0
+	owned_archipelago_items = []
+	archipelago_missing_locations = []
+	archipelago_checked_locations = []
+	deathlink = false
+	archipelago_notification_parent = null
+	archipelago_server_command_buffer = []
+	archipelago_notification_queue = []
+	archipelago_data_package = {}
+	archipelago_player_slot_info = {}
+	archipelago_connect_packet = {
+		"cmd": "Connect",
+		"password": "",
+		"game": "Bat to the Heavens",
+		"name": "",
+		"uuid": "",
+		"version": archipelago_network_version,
+		"items_handling": 0b111,
+		"tags": [],
+		"slot_data": true,
+	}
 
 ## Functions for Receiveing from Server
 func server_room_info(json_data):
@@ -455,11 +520,7 @@ func server_room_info(json_data):
 
 func server_connection_refused(json_data):
 	ModLoaderLog.info("Received command \"ConnectionRefused\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	archipelago_authenticated = false
-	archipelago_auth_attempted = false
-	archipelago_connected = false
-	archipelago_server_command_buffer = []
-	archipelago_web_socket.close()
+	archipelago_server_disconnect_unexpected()
 	ModLoaderLog.info("Connection refused by server.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_connected(json_data):
