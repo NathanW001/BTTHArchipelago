@@ -20,31 +20,17 @@ class CheckpointSanity(DefaultOnToggle):
   """
   display_name = "CheckpointSanity"
 
-class RandomizeStartingBat(Toggle): # TODO: maybe retool to force early rather than randomize
+class FixStartingBatPosition(Toggle):
   """
-  Randomizes the Starting Bat and disables the ability to recieve the Pink Bat from getting softlocked.
+  Fixes the position of the Default Bat to always be in the same position.
   """
-  display_name = "Randomize Starting Bat"
-
-class RandomizeBall(Toggle):
-  """
-  Randomizes the ability to turn into a ball.
-  """
-  display_name = "Randomize Ball"
-
-class RandomizeWaveDash(Toggle):
-  """
-  Randomizes the ability to wavedash.
-  """
-  display_name = "Randomize Wave Dash"
+  display_name = "Fix Starting Bat Position"
 
 BTTHOptionGroups = [
     OptionGroup("Archipelago Options", [
         Goal,
         CheckpointSanity,
-        RandomizeStartingBat,
-        RandomizeBall,
-        RandomizeWaveDash,
+        FixStartingBatPosition,
         DeathLink
     ]),
 ]
@@ -53,7 +39,5 @@ BTTHOptionGroups = [
 class BTTHOptions(PerGameCommonOptions):
   goal: Goal
   checkpointsanity: CheckpointSanity
-  ranomizestartingbat: RandomizeStartingBat
-  randomizeball: RandomizeBall
-  randomizewavedash: RandomizeWaveDash
+  fixstartingbatposition: FixStartingBatPosition
   deathlink: DeathLink

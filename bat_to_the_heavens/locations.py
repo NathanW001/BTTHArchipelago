@@ -8,26 +8,26 @@ class BTTHLocation(Location):
 
 # Fizzy Ice Cream Locations
 fizzy_ice_cream_locations = {
-    names.fizzy_mola_town_1: 0,
-	names.fizzy_mola_town_2: 1,
-	names.fizzy_belwheat_valley_1: 2,
-	names.fizzy_gc_warehouse_1: 3,
-	names.fizzy_entrance_ruins_1: 4,
-	names.fizzy_entrance_ruins_2: 5,
-	names.fizzy_gc_factory_1: 6,
-	names.fizzy_gc_factory_2: 7,
-	names.fizzy_forest_cavern_1: 8,
-	names.fizzy_eroded_beach_1: 9,
-	names.fizzy_port_naga_1: 10,
-	names.fizzy_port_naga_2: 11,
-	names.fizzy_port_naga_3: 12,
-	names.fizzy_port_naga_4: 13,
-	names.fizzy_basin_21_1: 14,
-	names.fizzy_basin_21_2: 15,
-	names.fizzy_pastel_strata_1: 16,
-	names.fizzy_precipice_bridge_1: 17,
-	names.fizzy_precipice_bridge_2: 18,
-	names.fizzy_villiths_drain_1: 19,
+    names.fizzy_mola_town_1: 1,
+	names.fizzy_mola_town_2: 2,
+	names.fizzy_belwheat_valley_1: 3,
+	names.fizzy_gc_warehouse_1: 4,
+	names.fizzy_entrance_ruins_1: 5,
+	names.fizzy_entrance_ruins_2: 6,
+	names.fizzy_gc_factory_1: 7,
+	names.fizzy_gc_factory_2: 8,
+	names.fizzy_forest_cavern_1: 9,
+	names.fizzy_eroded_beach_1: 10,
+	names.fizzy_port_naga_1: 11,
+	names.fizzy_port_naga_2: 12,
+	names.fizzy_port_naga_3: 13,
+	names.fizzy_port_naga_4: 14,
+	names.fizzy_basin_21_1: 15,
+	names.fizzy_basin_21_2: 16,
+	names.fizzy_pastel_strata_1: 17,
+	names.fizzy_precipice_bridge_1: 18,
+	names.fizzy_precipice_bridge_2: 19,
+	names.fizzy_villiths_drain_1: 20,
 }
 
 # Postcard Locations
@@ -208,8 +208,8 @@ all_locations = {
 
 # Locations by Region
 mola_town_locations = {
-    names.fizzy_mola_town_1: 0,
-	names.fizzy_mola_town_2: 1,
+    names.fizzy_mola_town_1: 1,
+	names.fizzy_mola_town_2: 2,
     names.collect_postcard_mola_town: 10000,
     names.collect_logbook: 30000,
     names.visit_mola_town: 50000,
@@ -219,7 +219,7 @@ mola_town_checkpoint_locations = {
 	names.checkpoint_1_mola_town: 60001,
 }
 belwheat_valley_locations = {
-    names.fizzy_belwheat_valley_1: 2,
+    names.fizzy_belwheat_valley_1: 3,
     names.collect_postcard_belwheat_valley: 10001,
 	names.collect_default_bat: 40000,
     names.visit_belwheat_valley: 50001,
@@ -231,7 +231,7 @@ belwheat_valley_checkpoint_locations = {
 	names.checkpoint_4_belwheat_valley: 60005,
 }
 gc_warehouse_locations = {
-	names.fizzy_gc_warehouse_1: 3,
+	names.fizzy_gc_warehouse_1: 4,
 	names.collect_postcard_gc_warehouse: 10002,
     names.visit_gc_warehouse: 50002,
 }
@@ -244,8 +244,8 @@ gc_warehouse_checkpoint_locations = {
 	names.checkpoint_6_gc_warehouse: 60011,
 }
 entrance_ruins_locations = {
-	names.fizzy_entrance_ruins_1: 4,
-	names.fizzy_entrance_ruins_2: 5,
+	names.fizzy_entrance_ruins_1: 5,
+	names.fizzy_entrance_ruins_2: 6,
     names.collect_postcard_entrance_ruins: 10003,
     names.visit_entrance_ruins: 50003,
 }
@@ -255,8 +255,8 @@ entrance_ruins_checkpoint_locations = {
 	names.checkpoint_3_entrance_ruins: 60014,
 }
 goldcherry_factory_locations = {
-	names.fizzy_gc_factory_1: 6,
-	names.fizzy_gc_factory_2: 7,
+	names.fizzy_gc_factory_1: 7,
+	names.fizzy_gc_factory_2: 8,
     names.collect_postcard_gc_factory: 10004,
 	names.collect_master_key: 30001,
 	names.collect_train_ticket: 30002,
@@ -278,7 +278,7 @@ cliff_face_checkpoint_locations = {
     
 }
 forest_cavern_locations = {
-	names.fizzy_forest_cavern_1: 8,
+	names.fizzy_forest_cavern_1: 9,
     names.collect_postcard_forest_cavern: 10005,
     names.visit_forest_cavern: 50006,
 }
@@ -290,7 +290,7 @@ forest_cavern_checkpoint_locations = {
 	names.checkpoint_5_forest_cavern: 60025,
 }
 eroded_beach_locations = {
-	names.fizzy_eroded_beach_1: 9,
+	names.fizzy_eroded_beach_1: 10,
     names.collect_postcard_eroded_beach: 10006,
 	names.phant_2: 20001,
     names.visit_eroded_beach: 50007,
@@ -304,10 +304,10 @@ eroded_beach_checkpoint_locations = {
 	names.checkpoint_6_eroded_beach: 60031,
 }
 port_naga_locations = {
-    names.fizzy_port_naga_1: 10,
-	names.fizzy_port_naga_2: 11,
-	names.fizzy_port_naga_3: 12,
-	names.fizzy_port_naga_4: 13,
+    names.fizzy_port_naga_1: 11,
+	names.fizzy_port_naga_2: 12,
+	names.fizzy_port_naga_3: 13,
+	names.fizzy_port_naga_4: 14,
 	names.collect_postcard_port_naga: 10007,
     names.collect_fizzy_bat: 40002,
     names.visit_port_naga: 50008,
@@ -317,8 +317,8 @@ port_naga_checkpoint_locations = {
 	names.checkpoint_2_port_naga: 60033,
 }
 basin_21_locations = {
-	names.fizzy_basin_21_1: 14,
-	names.fizzy_basin_21_2: 15,
+	names.fizzy_basin_21_1: 15,
+	names.fizzy_basin_21_2: 16,
     names.collect_postcard_basin_21: 10008,
 	names.phant_3: 20002,
 	names.phant_4: 20003,
@@ -335,7 +335,7 @@ basin_21_checkpoint_locations = {
 	names.checkpoint_7_basin_21: 60040,
 }
 pastel_strata_locations = {
-	names.fizzy_pastel_strata_1: 16,
+	names.fizzy_pastel_strata_1: 17,
     names.collect_postcard_pastel_strata: 10009,
 	names.phant_5: 20004,
     names.collect_phant_bat: 40003,
@@ -359,8 +359,8 @@ astral_tower_checkpoint_locations = {
     
 }
 precipice_bridge_locations = {
-	names.fizzy_precipice_bridge_1: 17,
-	names.fizzy_precipice_bridge_2: 18,
+	names.fizzy_precipice_bridge_1: 18,
+	names.fizzy_precipice_bridge_2: 19,
     names.collect_postcard_precipice_bridge: 10010,
     names.visit_precipice_bridge: 50012,
 }
@@ -424,7 +424,7 @@ power_room_checkpoint_locations = {
 
 }
 villiths_drain_locations = {
-    names.fizzy_villiths_drain_1: 19,
+    names.fizzy_villiths_drain_1: 20,
     names.collect_postcard_villiths_drain: 10011,
     names.collect_pink_bat: 40005,
     names.visit_villiths_drain: 50020,

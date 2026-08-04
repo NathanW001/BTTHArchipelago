@@ -92,8 +92,7 @@ class BTTHWorld(World):
               state.has(names.vector_block, self.player) and
               state.has(names.charge_block, self.player) and
               state.has(names.super_jump_block, self.player) and
-              state.has(names.ball_power, self.player) and
-              state.has(names.wave_dash_power, self.player)))
+              state.has(names.master_key, self.player)))
 
         # visualize_regions(self.get_region("Menu"), "btth.puml")
         
@@ -121,8 +120,6 @@ class BTTHWorld(World):
         return {
             "goal": self.options.goal.value,
             "checkpointsanity": self.options.checkpointsanity.value,
-            "ranomizestartingbat": self.options.ranomizestartingbat.value,
-            "randomizeball": self.options.randomizeball.value,
-            "randomizewavedash": self.options.randomizewavedash.value,
+            "fixstartingbatposition": self.options.fixstartingbatposition.value,
             "deathlink": self.options.deathlink.value
         }
