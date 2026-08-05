@@ -13,5 +13,10 @@ func collect_fic(iname: String) -> void :
 	Global.client_location_checks([archipelago_item_id])
 
 func end_game() -> void:
-	Global.client_status_update("goal")
+	if Global.goal == 0:
+		Global.client_status_update("goal")
+	elif Global.goal == 1 and Global.fizzy_increment_counter == 21:
+		Global.client_status_update("goal")
+	elif Global.goal == 2 and Global.info.checkpoints.size() >= 82:
+		Global.client_status_update("goal")
 	super()

@@ -274,6 +274,9 @@ var archipelago_auth_attempted = false # set true after Conncet packet is sent t
 var archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
 var archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 var archipelago_hint_points = 0
+var archipelago_goal = 0
+var archipelago_checkpointsanity = false
+
 
 var archipelago_notification_parent: Node = null
 
@@ -380,7 +383,7 @@ func _process(_delta):
 				var packet = archipelago_web_socket.get_packet()
 				if archipelago_web_socket.was_string_packet():
 					var packet_text = packet.get_string_from_utf8()
-					#ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
+					ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
 					server_process_raw_json(packet_text)
 				else:
 					#ModLoaderLog.info("< Got binary data from server: %d bytes" % packet.size(), WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -459,6 +462,8 @@ func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
 	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 	archipelago_hint_points = 0
+	archipelago_goal = 0
+	archipelago_checkpointsanity = false
 	owned_archipelago_items = []
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
@@ -492,6 +497,8 @@ func archipelago_server_disconnect_unexpected() -> void:
 	archipelago_authenticated = false # set true after server accepts Conncet packet and send Connected back
 	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 	archipelago_hint_points = 0
+	archipelago_goal = 0
+	archipelago_checkpointsanity = false
 	owned_archipelago_items = []
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
@@ -512,6 +519,11 @@ func archipelago_server_disconnect_unexpected() -> void:
 		"tags": [],
 		"slot_data": true,
 	}
+	
+func send_deathlink():
+	var tags = ["DeathLink"]
+	var data = {"time": int(Time.get_unix_time_from_system()), "name": archipelago_connect_packet["name"]}
+	client_bounce(null, null, tags, data)
 
 ## Functions for Receiveing from Server
 func server_room_info(json_data):
@@ -532,6 +544,12 @@ func server_connected(json_data):
 		archipelago_checked_locations.append(int(location))
 	archipelago_player_slot_info = json_data["slot_info"]
 	archipelago_hint_points = json_data["hint_points"]
+	if "goal" in json_data["slot_data"]:
+		archipelago_goal = int(json_data["slot_data"]["goal"])
+	if "checkpointsanity" in json_data["slot_data"]:
+		archipelago_checkpointsanity = bool(json_data["slot_data"]["checkpointsanity"])
+	if "deathlink" in json_data["slot_data"]:
+		deathlink = bool(json_data["slot_data"]["deathlink"])
 	ModLoaderLog.info("Successfully connected to slot.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_received_items(json_data):
@@ -699,9 +717,21 @@ func client_get_data_package(game_names):
 	archipelago_web_socket.send_text(json_get_data_package)
 	archipelago_data_package_requested = true
 	
-func client_bounce():
+func client_bounce(games = null, slots = null, tags = null, data = null):
 	ModLoaderLog.info("Sent command \"Bounce\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	var bounce_command = [{"cmd": "Bounce"}]
+	if games != null:
+		bounce_command[0]["games"] = games
+	if slots != null:
+		bounce_command[0]["slots"] = slots
+	if tags != null:
+		bounce_command[0]["tags"] = tags
+	if data != null:
+		bounce_command[0]["data"] = data
+	
+	var json_bounce = JSON.stringify(bounce_command)
+	archipelago_web_socket.send_text(json_bounce)
+	
 	
 func client_get():
 	ModLoaderLog.info("Sent command \"Get\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -714,3 +744,4 @@ func client_set():
 func client_set_notify():
 	ModLoaderLog.info("Sent command \"SetNotify\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	pass
+	

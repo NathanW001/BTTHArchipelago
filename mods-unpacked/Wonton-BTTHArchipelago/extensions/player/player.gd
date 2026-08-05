@@ -16,7 +16,16 @@ func tilehit(a, id_no: int = 0):
 		return ret
 	else:
 		return 25
+		
+func launch():
+	var temp_vector = velocity
+	super()
+	var hits = hitbox.get_collider(0)
+	if hits.is_in_group("direction") and "momentum_launcher" not in Global.owned_archipelago_items:
+		velocity = temp_vector
+		
+func _death():
+	super()
+	if Global.deathlink == true:
+		Global.send_deathlink()
 	
-#func launch():
-	#super()
-	#ModLoaderLog.info("bat hit", WONTON_BTTHARCHIPELAGO_LOG_NAME)
