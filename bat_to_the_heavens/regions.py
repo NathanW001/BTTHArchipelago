@@ -138,8 +138,6 @@ def create_regions(world: World) -> None:
 
 
 def connect_regions(world: World) -> None:
-    ranomized_ball = world.options.randomizeball
-    ranomized_wavedash = world.options.randomizewavedash
     region_names: Dict[str, int] = {}
 
     # As a note, I'm assuming that for each area after you recieve the knowledge on how to do the Ball and Wavedash,
@@ -204,7 +202,7 @@ def connect_regions(world: World) -> None:
     connect(world, world.player, region_names, names.entrance_ruins, names.goldcherry_factory, entrance_ruins_to_gc_factory)
     entrance_ruins_to_port_naga = lambda state: ( # Can ride the train from here to Port Naga
         (has_a_normal_bat(state) and
-         state.has(names.train_ticket, world.player),
+         state.has(names.train_ticket, world.player) and
          state.has(names.master_key, world.player))
     )
     connect(world, world.player, region_names, names.entrance_ruins, names.port_naga, entrance_ruins_to_port_naga)
@@ -267,7 +265,6 @@ def connect_regions(world: World) -> None:
          state.has(names.jump_block, world.player) and
          state.has(names.momentum_launcher, world.player))
     )
-    
     connect(world, world.player, region_names, names.basin_21, names.pastel_strata, basin_21_to_pastel_strata)
     basin_21_to_abandoned_district = lambda state: (
         (has_a_normal_bat(state) and
