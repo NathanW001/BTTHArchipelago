@@ -7,7 +7,6 @@ func _ready() -> void:
 		queue_free()
 		
 	hide_disable()
-	#ModLoaderLog.info(str(find_child("Sprite2D").frame_coords), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	var default_texture = load("res://mods-unpacked/Wonton-BTTHArchipelago/overwrites/sprite/objects/postcarditem.png")
 	var current_node_sprite = find_child("Sprite2D")
 	current_node_sprite.texture = default_texture
@@ -16,9 +15,6 @@ func _ready() -> void:
 	current_node_sprite.frame = 0
 
 func collect() -> void :
-	ModLoaderLog.info("wow! item collected! item = " + weapon, WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	#ModLoaderLog.info(str(Global.info["collectables"]), WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	#ModLoaderLog.info(str(Global.info["collection"]), WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	colli.set_deferred("disabled", true)
 	sfx.stream = item_touch
 	sfx.play()

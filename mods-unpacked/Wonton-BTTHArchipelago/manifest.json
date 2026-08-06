@@ -1,9 +1,9 @@
 {
 	"name": "BTTHArchipelago",
 	"namespace": "Wonton",
-	"version_number": "1.0.0",
+	"version_number": "0.1.0",
 	"description": "Implementation of the Archipelago Client specification",
-	"website_url": "https://github.com/example/repo",
+	"website_url": "https://github.com/NathanW001/BTTHArchipelago",
 	"dependencies": [],
 	"extra": {
 		"godot": {

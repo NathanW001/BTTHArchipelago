@@ -263,11 +263,14 @@ var owned_archipelago_items = []
 var archipelago_missing_locations = []
 var archipelago_checked_locations = []
 var deathlink = false
+var deathlink_player_object: Object
+var deathlink_last_death = Time.get_unix_time_from_system()
 
 var archipelago_url = ""
 var archipelago_port = -1
 var archipelago_web_socket = WebSocketPeer.new()
-var archipelago_connected = false # Connection to socket established
+var archipelago_connection_established = false # Connection parameters are valid
+var archipelago_connected = false # Connection to socket worked and not immediately terminated
 var archipelago_data_package_requested = false # sent request for GetDataPackage
 var archipelago_data_package_received = false # set true after we've gotten the data package
 var archipelago_auth_attempted = false # set true after Conncet packet is sent to server
@@ -275,6 +278,7 @@ var archipelago_authenticated = false # set true after server accepts Conncet pa
 var archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 var archipelago_hint_points = 0
 var archipelago_goal = 0
+var archipelago_slot = -1
 var archipelago_checkpointsanity = false
 
 
@@ -285,6 +289,10 @@ var archipelago_server_command_buffer = []
 var archipelago_notification_queue = []
 
 var archipelago_data_package = {}
+
+var archipelago_ws_connection_attempted = false
+
+var last_keepalive_bounce_timestamp = Time.get_unix_time_from_system()
 
 signal archipelago_data_package_received_signal
 
@@ -307,7 +315,7 @@ var archipelago_network_version = {
 	"class": "Version",
 	"major": 0,
 	"minor": 6,
-	"build": 8,
+	"build": 7,
 }
 
 var archipelago_connect_packet = {
@@ -341,6 +349,9 @@ func instantiate_archipelago_notifications(base_scene: Node) -> void:
 	var archipelago_notifs = archipelago_overlay.instantiate()
 	base_scene.add_child(archipelago_notifs)
 	archipelago_notification_parent = archipelago_notifs.get_child(0)
+	
+func register_player_for_deathlink(player: Object) -> void:
+	deathlink_player_object = player
 
 func fade_out_notif(notif: Node) -> void:
 	await get_tree().create_timer(5).timeout
@@ -352,28 +363,51 @@ func fade_out_notif(notif: Node) -> void:
 		notif.queue_free()
 
 func connect_to_archipelago() -> void:
-	if !archipelago_connected:
-		ModLoaderLog.info("url = " + archipelago_url + " port = " + str(archipelago_port), WONTON_BTTHARCHIPELAGO_LOG_NAME)
-		var err = archipelago_web_socket.connect_to_url(archipelago_url + ":" + str(archipelago_port))
+	if !archipelago_connected and !archipelago_ws_connection_attempted:
+		ModLoaderLog.info("attempting ws connection", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+		var err = archipelago_web_socket.connect_to_url("ws://" + archipelago_url + ":" + str(archipelago_port))
 		if err == OK:
-			#ModLoaderLog.info("Connecting to " + str(archipelago_web_socket), WONTON_BTTHARCHIPELAGO_LOG_NAME)
-			archipelago_connected = true
-		#else:
-			#ModLoaderLog.error("Unable to connect.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-		
+			archipelago_connection_established = true
+		else:
+			archipelago_server_disconnect_unexpected()
+	elif !archipelago_connected and archipelago_ws_connection_attempted:
+		ModLoaderLog.info("attempting wss connection", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+		var err = archipelago_web_socket.connect_to_url("wss://" + archipelago_url + ":" + str(archipelago_port))
+		if err == OK:
+			archipelago_connection_established = true
+		else:
+			archipelago_server_disconnect_unexpected()
+			
 func _process(_delta):
 	super(_delta)
 	if archipelago_notification_parent != null:
 		while len(archipelago_notification_queue) > 0:
 			var notif = archipelago_notification_queue.pop_front()
 			archipelago_notification_parent.add_child(notif)
-	
+			
+	if archipelago_connection_established and !archipelago_connected:
+		archipelago_web_socket.poll()
+		var state = archipelago_web_socket.get_ready_state()
+		if state == WebSocketPeer.STATE_OPEN:
+			archipelago_connected = true
+		elif state == WebSocketPeer.STATE_CLOSED:
+			if archipelago_ws_connection_attempted:
+				archipelago_server_disconnect_unexpected()
+			else:
+				archipelago_ws_connection_attempted = true
+				connect_to_archipelago()
+			
 	if archipelago_connected:
 		if archipelago_authenticated and archipelago_gamestate_loaded:
 			for command in archipelago_server_command_buffer:
 				ModLoaderLog.info("running buffer command", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 				process_server_command(command)
 			archipelago_server_command_buffer = []
+		if archipelago_authenticated:
+			var current_timestamp = Time.get_unix_time_from_system()
+			if (current_timestamp - last_keepalive_bounce_timestamp) > 10:
+				last_keepalive_bounce_timestamp = current_timestamp
+				send_keep_alive_bounce()
 		archipelago_web_socket.poll()
 		var state = archipelago_web_socket.get_ready_state()
 		# `WebSocketPeer.STATE_OPEN` means the socket is connected and ready
@@ -383,7 +417,7 @@ func _process(_delta):
 				var packet = archipelago_web_socket.get_packet()
 				if archipelago_web_socket.was_string_packet():
 					var packet_text = packet.get_string_from_utf8()
-					ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
+					#ModLoaderLog.info("< Got text data from server: %s" % packet_text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
 					server_process_raw_json(packet_text)
 				else:
 					#ModLoaderLog.info("< Got binary data from server: %d bytes" % packet.size(), WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -449,13 +483,18 @@ func process_server_command(command):
 			server_retrieved(command)
 		"SetReply":
 			server_set_reply(command)
+			
+func send_keep_alive_bounce() -> void:
+	client_bounce(null, [archipelago_slot], null, null)
 
 func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_web_socket.close(1000, "Client requested disconnect.")
 	archipelago_url = ""
 	archipelago_port = -1
 	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_connection_established = false
 	archipelago_connected = false # Connection to socket established
+	archipelago_ws_connection_attempted = false
 	archipelago_data_package_requested = false # sent request for GetDataPackage
 	archipelago_data_package_received = false # set true after we've gotten the data package
 	archipelago_auth_attempted = false # set true after Conncet packet is sent to server
@@ -468,6 +507,8 @@ func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
 	deathlink = false
+	deathlink_player_object = null
+	deathlink_last_death = Time.get_unix_time_from_system()
 	archipelago_notification_parent = null
 	archipelago_server_command_buffer = []
 	archipelago_notification_queue = []
@@ -486,11 +527,17 @@ func archipelago_client_disconnect_gracefully() -> void:
 	}
 	
 func archipelago_server_disconnect_unexpected() -> void:
+	if archipelago_notification_parent != null:
+		var archipelago_notification_node = archipelago_notification.instantiate()
+		archipelago_notification_node.text = "[color=red]Unexpected Archipelago disconnect. Please exit the game and reconnect from the main menu.[/color]" 
+		archipelago_notification_parent.add_child(archipelago_notification_node)
 	archipelago_web_socket.close(-1)
 	archipelago_url = ""
 	archipelago_port = -1
 	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_connection_established = false
 	archipelago_connected = false # Connection to socket established
+	archipelago_ws_connection_attempted = false
 	archipelago_data_package_requested = false # sent request for GetDataPackage
 	archipelago_data_package_received = false # set true after we've gotten the data package
 	archipelago_auth_attempted = false # set true after Conncet packet is sent to server
@@ -503,6 +550,8 @@ func archipelago_server_disconnect_unexpected() -> void:
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
 	deathlink = false
+	deathlink_player_object = null
+	deathlink_last_death = Time.get_unix_time_from_system()
 	archipelago_notification_parent = null
 	archipelago_server_command_buffer = []
 	archipelago_notification_queue = []
@@ -522,7 +571,7 @@ func archipelago_server_disconnect_unexpected() -> void:
 	
 func send_deathlink():
 	var tags = ["DeathLink"]
-	var data = {"time": int(Time.get_unix_time_from_system()), "name": archipelago_connect_packet["name"]}
+	var data = {"time": int(Time.get_unix_time_from_system()), "source": archipelago_connect_packet["name"]}
 	client_bounce(null, null, tags, data)
 
 ## Functions for Receiveing from Server
@@ -538,6 +587,7 @@ func server_connection_refused(json_data):
 func server_connected(json_data):
 	ModLoaderLog.info("Received command \"Connected\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	archipelago_authenticated = true
+	archipelago_slot = json_data["slot"]
 	for location in json_data["missing_locations"]:
 		archipelago_missing_locations.append(int(location))
 	for location in json_data["checked_locations"]:
@@ -550,6 +600,7 @@ func server_connected(json_data):
 		archipelago_checkpointsanity = bool(json_data["slot_data"]["checkpointsanity"])
 	if "deathlink" in json_data["slot_data"]:
 		deathlink = bool(json_data["slot_data"]["deathlink"])
+		client_connect_update(null, ["DeathLink"])
 	ModLoaderLog.info("Successfully connected to slot.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_received_items(json_data):
@@ -624,6 +675,7 @@ func server_print_json(json_data):
 	var archipelago_notification_node = archipelago_notification.instantiate()
 	archipelago_notification_node.text = ''.join(output_string_parts)
 	archipelago_notification_queue.append(archipelago_notification_node)
+	Global.fade_out_notif(archipelago_notification_node)
 	
 func server_room_update(json_data):
 	ModLoaderLog.info("Received command \"RoomUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -645,7 +697,18 @@ func server_data_package(json_data):
 	
 func server_bounced(json_data):
 	ModLoaderLog.info("Received command \"Bounced\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	if "tags" in json_data and "DeathLink" in json_data["tags"]:
+		if json_data["data"]["source"] == archipelago_connect_packet["name"] or json_data["data"]["source"] == archipelago_slot:
+			return
+		var current_timestamp = Time.get_unix_time_from_system()
+		if Global.deathlink == true and (current_timestamp - Global.deathlink_last_death) >= 10:
+			var notif_message = {"cmd": "PrintJson", "data":[{"text": str(json_data["data"]["source"]) + " has sent you a DeathLink"}]}
+			if "cause" in json_data["data"]:
+				notif_message["data"].append({"text": ": " + json_data["data"]["cause"]})
+			server_print_json(notif_message)
+			Global.deathlink_last_death = current_timestamp
+			if deathlink_player_object != null:
+				deathlink_player_object._death()
 	
 func server_invalid_packet(json_data):
 	ModLoaderLog.info("Received command \"InvalidPacket\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
@@ -666,9 +729,16 @@ func client_connect():
 	archipelago_web_socket.send_text(json_connect_info)
 	archipelago_auth_attempted = true
 
-func client_connect_update():
+func client_connect_update(items_handling, tags):
 	ModLoaderLog.info("Sent command \"ConnectUpdate\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
-	pass
+	var connect_update_command = [{"cmd": "ConnectUpdate"}]
+	if items_handling != null:
+		connect_update_command[0]["items_handling"] = items_handling
+	if tags != null:
+		connect_update_command[0]["tags"] = tags
+
+	var json_connect_update = JSON.stringify(connect_update_command)
+	archipelago_web_socket.send_text(json_connect_update)
 	
 func client_sync():
 	ModLoaderLog.info("Sent command \"Sync\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)

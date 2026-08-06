@@ -5,6 +5,8 @@ const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:player.gd"
 func _ready() -> void:
 	super()
 	Global.instantiate_archipelago_notifications(self)
+	if Global.deathlink:
+		Global.register_player_for_deathlink(self)
 
 func tilehit(a, id_no: int = 0):
 	var ret = super(a, id_no)
@@ -26,6 +28,8 @@ func launch():
 		
 func _death():
 	super()
-	if Global.deathlink == true:
+	var current_timestamp = Time.get_unix_time_from_system()
+	if Global.deathlink == true and (current_timestamp - Global.deathlink_last_death) >= 10:
+		Global.deathlink_last_death = current_timestamp
 		Global.send_deathlink()
 	

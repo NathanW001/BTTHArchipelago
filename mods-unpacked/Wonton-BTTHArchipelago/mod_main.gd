@@ -29,6 +29,7 @@ func install_script_extensions() -> void:
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("dialogue/balloon.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("level/phantalatar.gd"))
 	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("global/Save.gd"))
+	ModLoaderMod.install_script_extension(extensions_dir_path.path_join("objects/elepant.gd"))
 	# ModLoaderMod.install_script_extension(extensions_dir_path.path_join(...))
 
 

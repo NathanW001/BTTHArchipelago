@@ -43,7 +43,7 @@ func _on_press():
 	text_display_box.text = "[center][color=blue]Awaiting connection to Server..."
 	Global.connect_to_archipelago()
 	
-	while Global.archipelago_authenticated == false and Global.archipelago_connected == true:
+	while Global.archipelago_authenticated == false and Global.archipelago_connection_established == true:
 		await get_tree().create_timer(0.5).timeout 
 		
 	if Global.archipelago_authenticated:

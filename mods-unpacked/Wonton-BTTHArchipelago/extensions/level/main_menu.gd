@@ -8,7 +8,7 @@ var archipelago_options: CanvasLayer
 var archipelago_options_label: Label
 
 func _on_menu_actioned(item, _total) -> void:
-	ModLoaderLog.info("item text = " + item.text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	#ModLoaderLog.info("item text = " + item.text, WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	if item.text == "archipelago":
 		#activated = true
 		archipelago_options.activate_menu(archipelago_options_label)
