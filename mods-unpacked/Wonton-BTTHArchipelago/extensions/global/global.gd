@@ -2,8 +2,8 @@ extends "res://global/global.gd"
 
 const WONTON_BTTHARCHIPELAGO_LOG_NAME := "Wonton-BTTHArchipelago:global.gd"
 
-var archipelago_overlay = load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_overlay.tscn")
-var archipelago_notification= load("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_notification.tscn")
+const archipelago_overlay = preload("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_overlay.tscn")
+const archipelago_notification= preload("res://mods-unpacked/Wonton-BTTHArchipelago/new_assets/archipelago_overlay/archipelago_notification.tscn")
 
 var archipelago_internal_item_to_location_map = {
 	## Fizzies
@@ -332,6 +332,7 @@ var archipelago_connect_packet = {
 
 func _ready() -> void:
 	archipelago_web_socket.set_inbound_buffer_size(655350)
+	process_mode = Node.PROCESS_MODE_ALWAYS # Needed for network features. Will only run super in _process if not paused
 	super()
 	
 func newgame() -> void:
@@ -379,7 +380,9 @@ func connect_to_archipelago() -> void:
 			archipelago_server_disconnect_unexpected()
 			
 func _process(_delta):
-	super(_delta)
+	if !(get_tree().paused):
+		super(_delta) # Global was originally only run if not paused, so to maintain this we only run super() if the game isn't paused
+		
 	if archipelago_notification_parent != null:
 		while len(archipelago_notification_queue) > 0:
 			var notif = archipelago_notification_queue.pop_front()
