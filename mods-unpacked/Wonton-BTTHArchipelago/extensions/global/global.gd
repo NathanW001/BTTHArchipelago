@@ -278,6 +278,7 @@ var archipelago_authenticated = false # set true after server accepts Conncet pa
 var archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 var archipelago_hint_points = 0
 var archipelago_goal = 0
+var archipelago_fizzies_for_goal = -1
 var archipelago_slot = -1
 var archipelago_checkpointsanity = false
 
@@ -505,6 +506,7 @@ func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 	archipelago_hint_points = 0
 	archipelago_goal = 0
+	archipelago_fizzies_for_goal = -1
 	archipelago_checkpointsanity = false
 	owned_archipelago_items = []
 	archipelago_missing_locations = []
@@ -548,6 +550,7 @@ func archipelago_server_disconnect_unexpected() -> void:
 	archipelago_gamestate_loaded = false # set true inside of Global.newgame() (i think?), ok to set player item values if true
 	archipelago_hint_points = 0
 	archipelago_goal = 0
+	archipelago_fizzies_for_goal = -1
 	archipelago_checkpointsanity = false
 	owned_archipelago_items = []
 	archipelago_missing_locations = []
@@ -571,6 +574,13 @@ func archipelago_server_disconnect_unexpected() -> void:
 		"tags": [],
 		"slot_data": true,
 	}
+	
+func send_client_notification(text: String) -> void:
+	var archipelago_notification_node = archipelago_notification.instantiate()
+	archipelago_notification_node.text = text
+	archipelago_notification_queue.append(archipelago_notification_node)
+	Global.fade_out_notif(archipelago_notification_node)
+	
 	
 func send_deathlink():
 	var tags = ["DeathLink"]
@@ -599,6 +609,8 @@ func server_connected(json_data):
 	archipelago_hint_points = json_data["hint_points"]
 	if "goal" in json_data["slot_data"]:
 		archipelago_goal = int(json_data["slot_data"]["goal"])
+	if "fizziesforgoal" in json_data["slot_data"]:
+		archipelago_fizzies_for_goal = int(json_data["slot_data"]["fizziesforgoal"])
 	if "checkpointsanity" in json_data["slot_data"]:
 		archipelago_checkpointsanity = bool(json_data["slot_data"]["checkpointsanity"])
 	if "deathlink" in json_data["slot_data"]:
@@ -700,8 +712,9 @@ func server_data_package(json_data):
 	
 func server_bounced(json_data):
 	ModLoaderLog.info("Received command \"Bounced\".", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	ModLoaderLog.info(str(json_data), "death link info")
 	if "tags" in json_data and "DeathLink" in json_data["tags"]:
-		if json_data["data"]["source"] == archipelago_connect_packet["name"] or json_data["data"]["source"] == archipelago_slot:
+		if str(json_data["data"]["source"]) == archipelago_connect_packet["name"] or str(json_data["data"]["source"]) == str(archipelago_slot):
 			return
 		var current_timestamp = Time.get_unix_time_from_system()
 		if Global.deathlink == true and (current_timestamp - Global.deathlink_last_death) >= 10:
