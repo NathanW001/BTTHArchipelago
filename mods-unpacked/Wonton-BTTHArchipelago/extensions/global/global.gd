@@ -332,7 +332,7 @@ var archipelago_connect_packet = {
 }
 
 func _ready() -> void:
-	archipelago_web_socket.set_inbound_buffer_size(655350)
+	archipelago_web_socket.set_inbound_buffer_size(10485760)
 	process_mode = Node.PROCESS_MODE_ALWAYS # Needed for network features. Will only run super in _process if not paused
 	super()
 	
@@ -341,10 +341,15 @@ func newgame() -> void:
 	Global.archipelago_gamestate_loaded = true
 	for location in archipelago_checked_locations:
 		location = int(location)
-		if location >= 60000:
+		if location >= 60000 and location < 60072:
 			var location_checkpoint_name = archipelago_inverse_checkpoint_mapping[location]
 			set_collect("checkpoints", location_checkpoint_name, 1.0)
 			set_collect("checkpoints_deaths", location_checkpoint_name, 0.0)
+			Global.info["currentcheckpoint"] = location_checkpoint_name
+		elif location >= 60072:
+			var location_checkpoint_name = archipelago_inverse_checkpoint_mapping[location]
+			set_collect("newcheckpoints", location_checkpoint_name, 1.0)
+			set_collect("newcheckpoints_deaths", location_checkpoint_name, 0.0)
 			Global.info["currentcheckpoint"] = location_checkpoint_name
 
 func instantiate_archipelago_notifications(base_scene: Node) -> void: 
@@ -496,6 +501,7 @@ func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_url = ""
 	archipelago_port = -1
 	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_web_socket.set_inbound_buffer_size(10485760)
 	archipelago_connection_established = false
 	archipelago_connected = false # Connection to socket established
 	archipelago_ws_connection_attempted = false
@@ -540,6 +546,7 @@ func archipelago_server_disconnect_unexpected() -> void:
 	archipelago_url = ""
 	archipelago_port = -1
 	archipelago_web_socket = WebSocketPeer.new()
+	archipelago_web_socket.set_inbound_buffer_size(10485760)
 	archipelago_connection_established = false
 	archipelago_connected = false # Connection to socket established
 	archipelago_ws_connection_attempted = false
