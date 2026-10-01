@@ -61,11 +61,15 @@ def get_location_logic_mapping(world: World) -> Dict[str, Callable]:
     location_logic_mapping[names.checkpoint_3_belwheat_valley] = has_a_normal_bat
     location_logic_mapping[names.checkpoint_4_belwheat_valley] = has_a_normal_bat
 
-    # Cliff Face Location
+    # Cliff Face Locations
     location_logic_mapping[names.phant_1] = lambda state: ( # Key needed to get in the house
         (state.has(names.master_key, world.player))
     )
 
+    # Port Naga Locations
+    location_logic_mapping[names.fizzy_bat] = lambda state: ( # Need 20 fizzies for getting the Fizzy Bat
+        (state.count(names.fizzy_ice_cream, world.player) >= 20)
+    )
 
     # Additional Notes: 
     # - it's possible to progress to Entrance Ruins from GC Warehouse without actually touching a fence.

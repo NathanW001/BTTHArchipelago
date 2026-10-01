@@ -5,7 +5,7 @@ from Utils import visualize_regions
 from . import names
 from .items import BTTHItem, lookup_name_to_id, item_table, filler_table, bat_table, collectable_table, equipment_table, world_block_table, trap_table
 from .locations import BTTHLocation, lookup_location_to_id, all_locations, checkpoint_loctations
-from .options import BTTHOptions, BTTHOptionGroups
+from .options import BTTHOptions, BTTHOptionGroups, Goal
 from .regions import create_region, create_regions, connect_regions
 
 import settings
@@ -69,18 +69,23 @@ class BTTHWorld(World):
             [item_name for item_name in equipment_table.keys()] + \
             [item_name for item_name in world_block_table.keys()]
 
+        # Static Locations
+        if self.options.fixstartingbatposition:
+            item_names_to_create.remove(names.default_bat)
+            self.multiworld.get_location(names.collect_default_bat, self.player).place_locked_item(self.create_item(names.default_bat))
+        
+
         for item_name in item_names_to_create:
             itempool.append(self.create_item(item_name))
 
-        # Static Locations
-
+        
         while len(itempool) < total_locations:
             itempool.append(self.create_item(self.get_filler_item_name()))
 
         self.multiworld.itempool += itempool
 
         # TODO: check goal condition and set accordingly
-        self.multiworld.completion_condition[self.player] = lambda state: \
+        base_completion_condition = lambda state: \
             ((state.has(names.default_bat, self.player) or
               state.has(names.angel_bat, self.player) or
               state.has(names.fizzy_bat, self.player) or
@@ -93,6 +98,23 @@ class BTTHWorld(World):
               state.has(names.charge_block, self.player) and
               state.has(names.super_jump_block, self.player) and
               state.has(names.master_key, self.player)))
+        goal = self.options.goal
+        if goal == Goal.option_clear_game:
+            self.multiworld.completion_condition[self.player] = base_completion_condition
+        elif goal == Goal.option_clear_game_with_fizzies:
+            self.multiworld.completion_condition[self.player] = lambda state: \
+            (
+                base_completion_condition(state) and
+                state.count(names.fizzy_ice_cream, self.player) >= self.options.fizziesforgoal
+            )
+        elif goal == Goal.option_all_checkpoints:
+            self.multiworld.completion_condition[self.player] = lambda state: \
+            (
+                (base_completion_condition(state) and
+                 state.has(names.roller_blades, self.player) and
+                 state.has(names.float_block, self.player))
+            )
+
 
         # visualize_regions(self.get_region("Menu"), "btth.puml")
         
@@ -119,7 +141,9 @@ class BTTHWorld(World):
     def fill_slot_data(self) -> Dict[str, any]:
         return {
             "goal": self.options.goal.value,
+            "fizziesforgoal": self.options.fizziesforgoal.value,
             "checkpointsanity": self.options.checkpointsanity.value,
             "fixstartingbatposition": self.options.fixstartingbatposition.value,
-            "deathlink": self.options.deathlink.value
+            "deathlink": self.options.deathlink.value,
+            "deathlinkthreshold": self.options.deathlinkthreshold.value
         }
