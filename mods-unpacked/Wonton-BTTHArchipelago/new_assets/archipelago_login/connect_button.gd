@@ -6,7 +6,7 @@ func _ready():
 	self.pressed.connect(_on_press)
 
 func _on_press():
-	ModLoaderLog.info("button press", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	#ModLoaderLog.info("button press", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 	var url_verify_regex = RegEx.new()
 	url_verify_regex.compile("^(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,63}$")
@@ -37,7 +37,7 @@ func _on_press():
 		return
 	
 	var slot_password = get_node("../../Password/LineEdit").text
-	Global.archipelago_connect_packet["slot_password"] = slot_password
+	Global.archipelago_connect_packet["password"] = slot_password
 	
 		
 	text_display_box.text = "[center][color=blue]Awaiting connection to Server..."
@@ -48,5 +48,21 @@ func _on_press():
 		
 	if Global.archipelago_authenticated:
 		text_display_box.text = "[center][color=green]Server Connected!"
+		if !DirAccess.dir_exists_absolute("user://BTTHArchipelago"):
+			DirAccess.make_dir_absolute("user://BTTHArchipelago")
+		var network_info = FileAccess.open("user://BTTHArchipelago/network_info.sav", FileAccess.WRITE)
+		if network_info == null:
+			ModLoaderLog.info("File Access error with Network Information logging", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+		else:
+			var successful_connection_info = {
+				"server_url": server_url,
+				"server_port": server_port,
+				"slot_name": slot_name
+				# I'm not going to store the slot password, I don't really think that's a good idea security-wise
+			}
+			var network_info_json = JSON.stringify(successful_connection_info)
+			network_info.store_string(network_info_json)
+			network_info.close()
+	
 	else:
 		text_display_box.text = "[center][color=red]Server could not connect."

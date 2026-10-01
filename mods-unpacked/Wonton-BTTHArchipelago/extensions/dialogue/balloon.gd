@@ -26,7 +26,7 @@ func end_game() -> void:
 	else:
 		var incomplete_goal_notification = ["You do not currently meet the requirements for your goal!"]
 		if Global.archipelago_goal == 1:
-			incomplete_goal_notification.append(" You have " + str(Global.fizzy_increment_counter - 1) + " out of the " + str(Global.archipelago_fizzies_for_goal) + " required fizzies to meet your goal.")
+			incomplete_goal_notification.append(" You have " + str(Global.fizzy_increment_counter) + " out of the " + str(Global.archipelago_fizzies_for_goal) + " required fizzies to meet your goal.")
 		elif Global.archipelago_goal == 2:
 			incomplete_goal_notification.append(" You have " + str((Global.info.checkpoints.size() + Global.info["newcheckpoints"].size())) + " out of the 82 required checkpoints to meet your goal.")
 		var complete_string = "".join(incomplete_goal_notification)

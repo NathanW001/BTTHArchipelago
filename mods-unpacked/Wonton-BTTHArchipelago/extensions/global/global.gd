@@ -263,6 +263,8 @@ var owned_archipelago_items = []
 var archipelago_missing_locations = []
 var archipelago_checked_locations = []
 var deathlink = false
+var deathlink_threshold = 1
+var deathlink_deaths_count = 0
 var deathlink_player_object: Object
 var deathlink_last_death = Time.get_unix_time_from_system()
 
@@ -518,6 +520,8 @@ func archipelago_client_disconnect_gracefully() -> void:
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
 	deathlink = false
+	deathlink_threshold = 1
+	deathlink_deaths_count = 0
 	deathlink_player_object = null
 	deathlink_last_death = Time.get_unix_time_from_system()
 	archipelago_notification_parent = null
@@ -563,6 +567,8 @@ func archipelago_server_disconnect_unexpected() -> void:
 	archipelago_missing_locations = []
 	archipelago_checked_locations = []
 	deathlink = false
+	deathlink_threshold = 1
+	deathlink_deaths_count = 0
 	deathlink_player_object = null
 	deathlink_last_death = Time.get_unix_time_from_system()
 	archipelago_notification_parent = null
@@ -590,9 +596,14 @@ func send_client_notification(text: String) -> void:
 	
 	
 func send_deathlink():
+	deathlink_deaths_count += 1
+	if deathlink_deaths_count < deathlink_threshold:
+		return
 	var tags = ["DeathLink"]
 	var data = {"time": int(Time.get_unix_time_from_system()), "source": archipelago_connect_packet["name"]}
 	client_bounce(null, null, tags, data)
+	ModLoaderLog.info("Sent DeathLink bounce.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
+	deathlink_deaths_count = 0
 
 ## Functions for Receiveing from Server
 func server_room_info(json_data):
@@ -623,6 +634,8 @@ func server_connected(json_data):
 	if "deathlink" in json_data["slot_data"]:
 		deathlink = bool(json_data["slot_data"]["deathlink"])
 		client_connect_update(null, ["DeathLink"])
+	if "deathlink_threshold" in json_data["slot_data"]:
+		deathlink_threshold = int(json_data["slot_data"]["deathlink_threshold"])
 	ModLoaderLog.info("Successfully connected to slot.", WONTON_BTTHARCHIPELAGO_LOG_NAME)
 	
 func server_received_items(json_data):
